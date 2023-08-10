@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+main, form {
+    height: 100vh;
+    padding: 1em;
+}
