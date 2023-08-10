@@ -1,15 +1,24 @@
 "use client";
 
 import { Button } from "@mirohq/design-system";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { Editor } from "~/components/Editor";
 import { Input } from "~/components/Input";
+import { useMiroContext } from "~/components/MiroContext";
 import { codeSnippetsService } from "~/business/services/CodeSnippets";
 import { run } from "~/sandbox";
+import { Tags } from "~/components/Tags";
 
 export default function CodeEditor() {
   const [code, setCode] = useState<string | undefined>("");
+  const searchParams = useSearchParams();
+
+  const tags = searchParams
+    .getAll("type")
+    .map((type) => ({ id: type, name: type }));
+
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -41,6 +50,7 @@ export default function CodeEditor() {
         >
           Execute
         </Button>
+        <Tags tags={tags} />
         <Input label="Name" name="name" />
         <Editor onChange={setCode} />
       </form>

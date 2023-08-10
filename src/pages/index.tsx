@@ -4,7 +4,7 @@ import { init } from "~/miro";
 
 export default function Home() {
   useEffect(() => {
-    init().catch(console.error);
+      init().catch(console.error);
   }, []);
   return (
     <>

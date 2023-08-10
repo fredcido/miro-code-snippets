@@ -13,3 +13,15 @@ export const CodeSnippetSchema = CodeSnippetCreateSchema.extend({
 
 export type CodeSnippetCreate = z.infer<typeof CodeSnippetCreateSchema>;
 export type CodeSnippet = z.infer<typeof CodeSnippetSchema>;
+
+export type UserInfo = {
+  user: string;
+  team: string;
+  jwt: string;
+};
+
+export const UserInfoRequestSchema = z.object({
+  jwt: z.string(),
+});
+
+export type UserInfoRequest = z.infer<typeof UserInfoRequestSchema>;

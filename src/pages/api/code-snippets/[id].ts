@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { codeSnippetsController } from "~/server/controllers/code-snippets";
+import { codeSnippetsService } from "~/server/services/code-snippets";
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,11 +9,11 @@ export default async function handler(
   try {
     switch (req.method) {
       case "PUT": {
-        const snippet = await codeSnippetsController.update(req.body);
+        const snippet = await codeSnippetsService.update(req.body);
         return res.json(snippet);
       }
       case "GET": {
-        const item = await codeSnippetsController.getById(id);
+        const item = await codeSnippetsService.getById(id);
         return res.json(item);
       }
       default:

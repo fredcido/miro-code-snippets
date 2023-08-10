@@ -7,7 +7,7 @@ import {
 } from "~/business/models";
 import { prisma } from "../db";
 
-export const codeSnippetsController = {
+export const codeSnippetsService = {
   create: async (payload: unknown): Promise<Snippet> => {
     const data = CodeSnippetCreateSchema.parse(payload);
     return await prisma.snippet.create({ data });

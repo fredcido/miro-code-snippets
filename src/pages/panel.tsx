@@ -12,6 +12,7 @@ export default function CodeEditor() {
 
   return (
     <main>
+      <h1>Code snippets</h1>
       {items.map((item) => (
         <CodePreview key={item.id} title={item.name} code={item.code} />
       ))}

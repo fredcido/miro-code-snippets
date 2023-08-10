@@ -1,20 +1,63 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
+}
+
+generator zod {
+  provider = "prisma-zod-generator"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  USER
+  BOARD
+  TEAM
+}
+
+model Source {
+  id        String    @id @default(cuid())
+  userId    String
+  boardId   String
+  teamId    String
+  createdAt DateTime  @default(now())
+  Snippet   Snippet[]
+
+  @@unique([userId, boardId, teamId])
+}
+
+model ShareConfig {
+  id         String     @id @default(cuid())
+  sourceType SourceType @default(USER)
+  identifier String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  snippet    Snippet    @relation(fields: [snippetId], references: [id])
+  snippetId  String
+}
+
+model Predicate {
+  id        String   @id @default(cuid())
+  predicate Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  snippet   Snippet  @relation(fields: [snippetId], references: [id])
+  snippetId String
 }
 
 model Snippet {
-    id        String   @id @default(cuid())
-    name      String
-    code      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id          String        @id @default(cuid())
+  name        String
+  code        String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  createdBy   Source        @relation(fields: [sourceId], references: [id])
+  sourceId    String
+  ShareConfig ShareConfig[]
+  Predicate   Predicate[]
 }

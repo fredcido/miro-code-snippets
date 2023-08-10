@@ -1,6 +1,10 @@
+import { type UserInfo } from "../models";
+
 export const BASE_API = "/api";
 
-const buildEndpoint = (url: string): string => `${BASE_API}/${url}`;
+const buildEndpoint = (url: string): string => `${BASE_API}${url}`;
+
+let userInfo: UserInfo;
 
 const Payload = async <Response, Data = unknown>(
   url: string,
@@ -8,13 +12,20 @@ const Payload = async <Response, Data = unknown>(
 ): Promise<Response> => {
   const { data, ...rest } = config ?? {};
 
-  const internalConfig = {
+  const internalConfig: RequestInit = {
     ...rest,
     headers: {
       "Content-Type": "application/json",
     },
     body: data ? JSON.stringify(data) : undefined,
   };
+
+  if (userInfo?.jwt) {
+    internalConfig.headers = {
+      ...internalConfig.headers,
+      Authorization: `Bearer ${userInfo.jwt}`,
+    };
+  }
 
   const response = await fetch(buildEndpoint(url), internalConfig);
   const responseData = (await response.json()) as Response;
@@ -27,6 +38,9 @@ const Payload = async <Response, Data = unknown>(
 };
 
 export const api = {
+  setUserInfo: (user: UserInfo) => {
+    userInfo = user;
+  },
   get: async <LocalResponse>(url: string): Promise<LocalResponse> =>
     Payload<LocalResponse>(url),
   post: async <Payload, LocalResponse = Response>(
