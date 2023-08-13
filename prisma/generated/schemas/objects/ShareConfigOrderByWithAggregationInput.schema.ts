@@ -14,6 +14,7 @@ const Schema: z.ZodType<Prisma.ShareConfigOrderByWithAggregationInput> = z
     createdAt: z.lazy(() => SortOrderSchema).optional(),
     updatedAt: z.lazy(() => SortOrderSchema).optional(),
     snippetId: z.lazy(() => SortOrderSchema).optional(),
+    sourceId: z.lazy(() => SortOrderSchema).optional(),
     _count: z
       .lazy(() => ShareConfigCountOrderByAggregateInputObjectSchema)
       .optional(),

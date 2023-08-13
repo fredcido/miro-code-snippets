@@ -4,7 +4,9 @@ export const SnippetScalarFieldEnumSchema = z.enum([
   "id",
   "name",
   "code",
+  "sourceId",
   "createdAt",
   "updatedAt",
-  "sourceId",
+  "icon",
+  "status",
 ]);

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SnippetUncheckedCreateNestedManyWithoutCreatedByInputObjectSchema } from "./SnippetUncheckedCreateNestedManyWithoutCreatedByInput.schema";
+import { ShareConfigUncheckedCreateNestedManyWithoutCreatedByInputObjectSchema } from "./ShareConfigUncheckedCreateNestedManyWithoutCreatedByInput.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -13,6 +14,12 @@ const Schema: z.ZodType<Prisma.SourceUncheckedCreateInput> = z
     Snippet: z
       .lazy(
         () => SnippetUncheckedCreateNestedManyWithoutCreatedByInputObjectSchema
+      )
+      .optional(),
+    ShareConfig: z
+      .lazy(
+        () =>
+          ShareConfigUncheckedCreateNestedManyWithoutCreatedByInputObjectSchema
       )
       .optional(),
   })

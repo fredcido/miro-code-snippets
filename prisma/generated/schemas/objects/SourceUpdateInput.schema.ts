@@ -2,6 +2,7 @@ import { z } from "zod";
 import { StringFieldUpdateOperationsInputObjectSchema } from "./StringFieldUpdateOperationsInput.schema";
 import { DateTimeFieldUpdateOperationsInputObjectSchema } from "./DateTimeFieldUpdateOperationsInput.schema";
 import { SnippetUpdateManyWithoutCreatedByNestedInputObjectSchema } from "./SnippetUpdateManyWithoutCreatedByNestedInput.schema";
+import { ShareConfigUpdateManyWithoutCreatedByNestedInputObjectSchema } from "./ShareConfigUpdateManyWithoutCreatedByNestedInput.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -39,6 +40,9 @@ const Schema: z.ZodType<Prisma.SourceUpdateInput> = z
       .optional(),
     Snippet: z
       .lazy(() => SnippetUpdateManyWithoutCreatedByNestedInputObjectSchema)
+      .optional(),
+    ShareConfig: z
+      .lazy(() => ShareConfigUpdateManyWithoutCreatedByNestedInputObjectSchema)
       .optional(),
   })
   .strict();

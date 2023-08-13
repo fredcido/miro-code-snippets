@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { StringWithAggregatesFilterObjectSchema } from "./StringWithAggregatesFilter.schema";
 import { DateTimeWithAggregatesFilterObjectSchema } from "./DateTimeWithAggregatesFilter.schema";
+import { EnumSnippetStatusWithAggregatesFilterObjectSchema } from "./EnumSnippetStatusWithAggregatesFilter.schema";
+import { SnippetStatusSchema } from "../enums/SnippetStatus.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -31,6 +33,9 @@ const Schema: z.ZodType<Prisma.SnippetScalarWhereWithAggregatesInput> = z
     code: z
       .union([z.lazy(() => StringWithAggregatesFilterObjectSchema), z.string()])
       .optional(),
+    sourceId: z
+      .union([z.lazy(() => StringWithAggregatesFilterObjectSchema), z.string()])
+      .optional(),
     createdAt: z
       .union([
         z.lazy(() => DateTimeWithAggregatesFilterObjectSchema),
@@ -43,8 +48,14 @@ const Schema: z.ZodType<Prisma.SnippetScalarWhereWithAggregatesInput> = z
         z.coerce.date(),
       ])
       .optional(),
-    sourceId: z
+    icon: z
       .union([z.lazy(() => StringWithAggregatesFilterObjectSchema), z.string()])
+      .optional(),
+    status: z
+      .union([
+        z.lazy(() => EnumSnippetStatusWithAggregatesFilterObjectSchema),
+        z.lazy(() => SnippetStatusSchema),
+      ])
       .optional(),
   })
   .strict();

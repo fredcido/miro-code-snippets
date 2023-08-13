@@ -1,15 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { verify } from "jsonwebtoken";
-import { type UserInfo, UserInfoRequestSchema } from "~/business/models";
-import { env } from "~/env.mjs";
+import { extractUser } from "~/server/auth";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   try {
     switch (req.method) {
-      case "POST": {
-        const body = UserInfoRequestSchema.parse(req.body);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        const userInfo = verify(body.jwt, env.MIRO_CLIENT_SECRET) as UserInfo;
+      case "GET": {
+        const userInfo = await extractUser(req.headers.authorization);
 
         return res.json({
           user: userInfo.user,

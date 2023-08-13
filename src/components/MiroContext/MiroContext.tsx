@@ -4,7 +4,8 @@ import React, { useContext, useEffect, useState } from "react";
 import type { BoardInfo } from "@mirohq/websdk-types";
 import { miroService } from "~/business/services/Miro";
 import type { UserInfo } from "~/business/models";
-import { api } from "~/business/services";
+import { api } from "~/business";
+import Skeleton from "../Skeleton/Skeleton";
 
 type Props = {
   children: React.ReactNode;
@@ -29,10 +30,9 @@ const fetchUserInfo = async () => {
 };
 
 const fetchContext = async () => {
-  const [boardInfo, userInfo] = await Promise.all([
-    miro.board.getInfo(),
-    fetchUserInfo(),
-  ]);
+  const boardInfo = await miro.board.getInfo();
+  api.addHeader("X-BOARD-ID", boardInfo.id);
+  const userInfo = await fetchUserInfo();
 
   return {
     boardInfo,
@@ -49,28 +49,24 @@ export const useMiroContext = () => {
 };
 
 export function MiroContextWrapper({ children, fallback }: Props) {
-  const [isServer, setIsServer] = useState(true);
   const [state, setState] = useState<ContextStatus>("idle");
   const [context, setContext] = useState<MiroContextData | undefined>();
 
   useEffect(() => {
-    setIsServer(false);
-
     fetchContext()
       .then((context) => {
         setContext(context);
-        api.setUserInfo(context.userInfo);
+
+        api.addHeader("X-BOARD-ID", context.boardInfo.id);
+        api.setJWT(context.userInfo.jwt);
+
         setState("done");
       })
       .catch((err) => {
         console.error(err);
         setState("error");
       });
-  }, [isServer]);
-
-  if (isServer) {
-    return children;
-  }
+  }, []);
 
   if (state === "error") {
     return <h1>Something went wrong fetching Miro context</h1>;
@@ -82,7 +78,5 @@ export function MiroContextWrapper({ children, fallback }: Props) {
     );
   }
 
-  return (
-    fallback ?? <div suppressHydrationWarning>Fetching Miro context....</div>
-  );
+  return fallback ?? <Skeleton />;
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SnippetStatusSchema } from "../enums/SnippetStatus.schema";
 import { SourceCreateNestedOneWithoutSnippetInputObjectSchema } from "./SourceCreateNestedOneWithoutSnippetInput.schema";
 import { ShareConfigCreateNestedManyWithoutSnippetInputObjectSchema } from "./ShareConfigCreateNestedManyWithoutSnippetInput.schema";
 import { PredicateCreateNestedManyWithoutSnippetInputObjectSchema } from "./PredicateCreateNestedManyWithoutSnippetInput.schema";
@@ -12,6 +13,8 @@ const Schema: z.ZodType<Prisma.SnippetCreateInput> = z
     code: z.string(),
     createdAt: z.coerce.date().optional(),
     updatedAt: z.coerce.date().optional(),
+    icon: z.string(),
+    status: z.lazy(() => SnippetStatusSchema),
     createdBy: z.lazy(
       () => SourceCreateNestedOneWithoutSnippetInputObjectSchema
     ),

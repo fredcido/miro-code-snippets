@@ -5,6 +5,8 @@ import { SourceTypeSchema } from "../enums/SourceType.schema";
 import { DateTimeFilterObjectSchema } from "./DateTimeFilter.schema";
 import { SnippetRelationFilterObjectSchema } from "./SnippetRelationFilter.schema";
 import { SnippetWhereInputObjectSchema } from "./SnippetWhereInput.schema";
+import { SourceRelationFilterObjectSchema } from "./SourceRelationFilter.schema";
+import { SourceWhereInputObjectSchema } from "./SourceWhereInput.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -47,10 +49,19 @@ const Schema: z.ZodType<Prisma.ShareConfigWhereInput> = z
     snippetId: z
       .union([z.lazy(() => StringFilterObjectSchema), z.string()])
       .optional(),
+    sourceId: z
+      .union([z.lazy(() => StringFilterObjectSchema), z.string()])
+      .optional(),
     snippet: z
       .union([
         z.lazy(() => SnippetRelationFilterObjectSchema),
         z.lazy(() => SnippetWhereInputObjectSchema),
+      ])
+      .optional(),
+    createdBy: z
+      .union([
+        z.lazy(() => SourceRelationFilterObjectSchema),
+        z.lazy(() => SourceWhereInputObjectSchema),
       ])
       .optional(),
   })

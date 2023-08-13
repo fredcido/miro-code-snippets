@@ -14,7 +14,6 @@ export default function Document() {
         <Script
           src={process.env.NEXT_PUBLIC_MIRO_SDK}
           strategy="beforeInteractive"
-          onLoad={() => console.log("MIRO HAS LOADED")}
         ></Script>
       </body>
     </Html>

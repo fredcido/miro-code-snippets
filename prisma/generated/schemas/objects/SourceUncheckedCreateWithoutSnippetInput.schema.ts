@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ShareConfigUncheckedCreateNestedManyWithoutCreatedByInputObjectSchema } from "./ShareConfigUncheckedCreateNestedManyWithoutCreatedByInput.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -9,6 +10,12 @@ const Schema: z.ZodType<Prisma.SourceUncheckedCreateWithoutSnippetInput> = z
     boardId: z.string(),
     teamId: z.string(),
     createdAt: z.coerce.date().optional(),
+    ShareConfig: z
+      .lazy(
+        () =>
+          ShareConfigUncheckedCreateNestedManyWithoutCreatedByInputObjectSchema
+      )
+      .optional(),
   })
   .strict();
 

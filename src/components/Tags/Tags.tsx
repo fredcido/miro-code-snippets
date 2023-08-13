@@ -1,9 +1,6 @@
 import React from "react";
-
-export type Tag = {
-  id: string;
-  name: string;
-};
+import type { Tag } from "./Tag";
+import { Tag as TagItem } from "./Tag";
 
 type Props = {
   tags: Tag[];
@@ -12,19 +9,9 @@ type Props = {
 
 export function Tags({ tags, onRemove }: Props) {
   return (
-    <div>
+    <div className="flex gap-2">
       {tags.map((tag) => (
-        <span key={tag.id} className="tag">
-          {tag.name}
-          {onRemove && (
-            <button
-              type="button"
-              className="icon icon-close"
-              aria-label="Remove tag"
-              onClick={() => onRemove(tag)}
-            ></button>
-          )}
-        </span>
+        <TagItem onRemove={onRemove} key={tag.id} tag={tag} />
       ))}
     </div>
   );

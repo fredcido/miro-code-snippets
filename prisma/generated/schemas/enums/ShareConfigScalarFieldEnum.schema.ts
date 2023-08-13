@@ -7,4 +7,5 @@ export const ShareConfigScalarFieldEnumSchema = z.enum([
   "createdAt",
   "updatedAt",
   "snippetId",
+  "sourceId",
 ]);

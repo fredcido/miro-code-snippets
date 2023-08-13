@@ -55,6 +55,9 @@ const Schema: z.ZodType<Prisma.ShareConfigScalarWhereWithAggregatesInput> = z
     snippetId: z
       .union([z.lazy(() => StringWithAggregatesFilterObjectSchema), z.string()])
       .optional(),
+    sourceId: z
+      .union([z.lazy(() => StringWithAggregatesFilterObjectSchema), z.string()])
+      .optional(),
   })
   .strict();
 

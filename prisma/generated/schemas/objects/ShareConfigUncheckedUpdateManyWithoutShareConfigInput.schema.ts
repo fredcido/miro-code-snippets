@@ -39,6 +39,12 @@ const Schema: z.ZodType<Prisma.ShareConfigUncheckedUpdateManyWithoutShareConfigI
           z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema),
         ])
         .optional(),
+      snippetId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputObjectSchema),
+        ])
+        .optional(),
     })
     .strict();
 

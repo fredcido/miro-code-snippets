@@ -10,11 +10,23 @@ export default function CodeEditor() {
     codeSnippetsService.getAll().then(setItems).catch(console.error);
   }, []);
 
+  const handleEdit = (code: CodeSnippet) => {
+    miro.board.ui
+      .openModal({
+        url: `/code-editor/?id=${code.id}`,
+        width: 800,
+      })
+      .catch(console.error);
+  };
+
   return (
-    <main>
-      <h1>Code snippets</h1>
+    <main className="flex flex-col gap-4 p-6">
       {items.map((item) => (
-        <CodePreview key={item.id} title={item.name} code={item.code} />
+        <CodePreview
+          key={item.id}
+          codeSnippet={item}
+          onEdit={() => handleEdit(item)}
+        />
       ))}
     </main>
   );

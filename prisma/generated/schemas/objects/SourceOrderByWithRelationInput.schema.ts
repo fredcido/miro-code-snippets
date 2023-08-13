@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { SortOrderSchema } from "../enums/SortOrder.schema";
 import { SnippetOrderByRelationAggregateInputObjectSchema } from "./SnippetOrderByRelationAggregateInput.schema";
+import { ShareConfigOrderByRelationAggregateInputObjectSchema } from "./ShareConfigOrderByRelationAggregateInput.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -13,6 +14,9 @@ const Schema: z.ZodType<Prisma.SourceOrderByWithRelationInput> = z
     createdAt: z.lazy(() => SortOrderSchema).optional(),
     Snippet: z
       .lazy(() => SnippetOrderByRelationAggregateInputObjectSchema)
+      .optional(),
+    ShareConfig: z
+      .lazy(() => ShareConfigOrderByRelationAggregateInputObjectSchema)
       .optional(),
   })
   .strict();

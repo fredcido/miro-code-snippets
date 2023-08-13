@@ -10,6 +10,7 @@ const Schema: z.ZodType<Prisma.ShareConfigCreateManySnippetInput> = z
     identifier: z.string(),
     createdAt: z.coerce.date().optional(),
     updatedAt: z.coerce.date().optional(),
+    sourceId: z.string(),
   })
   .strict();
 

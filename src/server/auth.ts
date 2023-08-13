@@ -1,24 +1,31 @@
-import type { NextRequest } from "next/server";
-
-import { verify } from "jsonwebtoken";
+import * as jose from "jose";
 import type { UserInfo } from "~/business/models";
 import { env } from "~/env.mjs";
 
-export const extractUser = (request: NextRequest): UserInfo => {
+export const extractUser = async (
+  authHeader?: string | null
+): Promise<UserInfo> => {
   const nope = () => {
     throw new Error("Invalid JWT provided");
   };
 
-  if (!request.headers.has("Authorization")) {
+  if (!authHeader) {
     return nope();
   }
 
-  const Authorization = request.headers.get("Authorization");
-  const jwt = Authorization?.split("Beaer: ").pop();
+  const jwt = authHeader?.split("Bearer ").pop();
 
-  if (!jwt) {
+  if (jwt) {
+    const { payload } = await jose.jwtVerify(
+      jwt,
+      new TextEncoder().encode(env.MIRO_CLIENT_SECRET)
+    );
+
+    return {
+      ...payload,
+      jwt,
+    } as UserInfo;
+  } else {
     return nope();
   }
-
-  return verify(jwt, env.MIRO_CLIENT_SECRET) as unknown as UserInfo;
 };

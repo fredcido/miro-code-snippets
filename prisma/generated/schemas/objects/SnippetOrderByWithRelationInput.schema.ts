@@ -11,9 +11,11 @@ const Schema: z.ZodType<Prisma.SnippetOrderByWithRelationInput> = z
     id: z.lazy(() => SortOrderSchema).optional(),
     name: z.lazy(() => SortOrderSchema).optional(),
     code: z.lazy(() => SortOrderSchema).optional(),
+    sourceId: z.lazy(() => SortOrderSchema).optional(),
     createdAt: z.lazy(() => SortOrderSchema).optional(),
     updatedAt: z.lazy(() => SortOrderSchema).optional(),
-    sourceId: z.lazy(() => SortOrderSchema).optional(),
+    icon: z.lazy(() => SortOrderSchema).optional(),
+    status: z.lazy(() => SortOrderSchema).optional(),
     createdBy: z
       .lazy(() => SourceOrderByWithRelationInputObjectSchema)
       .optional(),

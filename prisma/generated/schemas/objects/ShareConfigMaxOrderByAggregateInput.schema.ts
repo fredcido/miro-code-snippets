@@ -11,6 +11,7 @@ const Schema: z.ZodType<Prisma.ShareConfigMaxOrderByAggregateInput> = z
     createdAt: z.lazy(() => SortOrderSchema).optional(),
     updatedAt: z.lazy(() => SortOrderSchema).optional(),
     snippetId: z.lazy(() => SortOrderSchema).optional(),
+    sourceId: z.lazy(() => SortOrderSchema).optional(),
   })
   .strict();
 

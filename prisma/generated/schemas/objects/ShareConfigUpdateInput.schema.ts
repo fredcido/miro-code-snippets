@@ -4,6 +4,7 @@ import { SourceTypeSchema } from "../enums/SourceType.schema";
 import { EnumSourceTypeFieldUpdateOperationsInputObjectSchema } from "./EnumSourceTypeFieldUpdateOperationsInput.schema";
 import { DateTimeFieldUpdateOperationsInputObjectSchema } from "./DateTimeFieldUpdateOperationsInput.schema";
 import { SnippetUpdateOneRequiredWithoutShareConfigNestedInputObjectSchema } from "./SnippetUpdateOneRequiredWithoutShareConfigNestedInput.schema";
+import { SourceUpdateOneRequiredWithoutShareConfigNestedInputObjectSchema } from "./SourceUpdateOneRequiredWithoutShareConfigNestedInput.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -42,6 +43,11 @@ const Schema: z.ZodType<Prisma.ShareConfigUpdateInput> = z
     snippet: z
       .lazy(
         () => SnippetUpdateOneRequiredWithoutShareConfigNestedInputObjectSchema
+      )
+      .optional(),
+    createdBy: z
+      .lazy(
+        () => SourceUpdateOneRequiredWithoutShareConfigNestedInputObjectSchema
       )
       .optional(),
   })

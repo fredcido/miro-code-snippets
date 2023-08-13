@@ -1,4 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { CreateCodeSnippetSchema } from "~/business/models";
+import { extractUser } from "~/server/auth";
 import { codeSnippetsService } from "~/server/services/code-snippets";
 
 export default async function handler(
@@ -8,7 +10,16 @@ export default async function handler(
   try {
     switch (req.method) {
       case "POST": {
-        const snippet = await codeSnippetsService.create(req.body);
+        const userInfo = await extractUser(req.headers.authorization);
+        const boardId = req.headers["x-board-id"] as string;
+        const newCodeSnippet = CreateCodeSnippetSchema.parse(req.body);
+
+        const snippet = await codeSnippetsService.create(
+          newCodeSnippet,
+          userInfo,
+          boardId
+        );
+
         return res.json(snippet);
       }
       case "GET": {

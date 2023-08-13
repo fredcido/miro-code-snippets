@@ -1,4 +1,4 @@
-// import createVirtualEnvironment from "@locker/near-membrane-dom";
+import createVirtualEnvironment from "@locker/near-membrane-dom";
 
 import { type Sandbox } from "./sandbox";
 

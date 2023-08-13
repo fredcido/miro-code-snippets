@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SnippetStatusSchema } from "../enums/SnippetStatus.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -9,6 +10,8 @@ const Schema: z.ZodType<Prisma.SnippetCreateManyCreatedByInput> = z
     code: z.string(),
     createdAt: z.coerce.date().optional(),
     updatedAt: z.coerce.date().optional(),
+    icon: z.string(),
+    status: z.lazy(() => SnippetStatusSchema),
   })
   .strict();
 

@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { StringFieldUpdateOperationsInputObjectSchema } from "./StringFieldUpdateOperationsInput.schema";
 import { DateTimeFieldUpdateOperationsInputObjectSchema } from "./DateTimeFieldUpdateOperationsInput.schema";
+import { SnippetStatusSchema } from "../enums/SnippetStatus.schema";
+import { EnumSnippetStatusFieldUpdateOperationsInputObjectSchema } from "./EnumSnippetStatusFieldUpdateOperationsInput.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -35,6 +37,18 @@ const Schema: z.ZodType<Prisma.SnippetUncheckedUpdateManyWithoutSnippetInput> =
         .union([
           z.coerce.date(),
           z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema),
+        ])
+        .optional(),
+      icon: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputObjectSchema),
+        ])
+        .optional(),
+      status: z
+        .union([
+          z.lazy(() => SnippetStatusSchema),
+          z.lazy(() => EnumSnippetStatusFieldUpdateOperationsInputObjectSchema),
         ])
         .optional(),
     })

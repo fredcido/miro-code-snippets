@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { StringFieldUpdateOperationsInputObjectSchema } from "./StringFieldUpdateOperationsInput.schema";
 import { DateTimeFieldUpdateOperationsInputObjectSchema } from "./DateTimeFieldUpdateOperationsInput.schema";
+import { SnippetStatusSchema } from "../enums/SnippetStatus.schema";
+import { EnumSnippetStatusFieldUpdateOperationsInputObjectSchema } from "./EnumSnippetStatusFieldUpdateOperationsInput.schema";
 import { ShareConfigUncheckedUpdateManyWithoutSnippetNestedInputObjectSchema } from "./ShareConfigUncheckedUpdateManyWithoutSnippetNestedInput.schema";
 import { PredicateUncheckedUpdateManyWithoutSnippetNestedInputObjectSchema } from "./PredicateUncheckedUpdateManyWithoutSnippetNestedInput.schema";
 
@@ -36,6 +38,18 @@ const Schema: z.ZodType<Prisma.SnippetUncheckedUpdateWithoutCreatedByInput> = z
       .union([
         z.coerce.date(),
         z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema),
+      ])
+      .optional(),
+    icon: z
+      .union([
+        z.string(),
+        z.lazy(() => StringFieldUpdateOperationsInputObjectSchema),
+      ])
+      .optional(),
+    status: z
+      .union([
+        z.lazy(() => SnippetStatusSchema),
+        z.lazy(() => EnumSnippetStatusFieldUpdateOperationsInputObjectSchema),
       ])
       .optional(),
     ShareConfig: z

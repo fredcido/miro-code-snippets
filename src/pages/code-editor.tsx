@@ -2,36 +2,96 @@
 
 import { Button } from "@mirohq/design-system";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Editor } from "~/components/Editor";
 import { Input } from "~/components/Input";
-import { useMiroContext } from "~/components/MiroContext";
-import { codeSnippetsService } from "~/business/services/CodeSnippets";
+import {
+  CodeSnippet,
+  CreateCodeSnippet,
+  codeSnippetsService,
+} from "~/business";
 import { run } from "~/sandbox";
 import { Tags } from "~/components/Tags";
+import { IconSelector } from "~/components/IconSelector";
+
+const initialCode = `/**
+ * Make sure your code exports the run function as demonstrated here
+ */
+export async function run(context) {
+  // Write your code here
+  miro.board.createStickyNote({
+      content: 'Hello'
+  })
+}
+`;
 
 export default function CodeEditor() {
-  const [code, setCode] = useState<string | undefined>("");
+  const [snippet, setSnippet] = useState<CreateCodeSnippet>({
+    code: initialCode,
+    name: "",
+    status: "draft",
+    visibility: "private",
+    icon: "triangle-square-circle",
+  });
+  const [code, setCode] = useState<string | undefined>(initialCode);
+  const [icon, setIcon] = useState<string>("triangle-square-circle");
+  const [state, setState] = useState<"idle" | "busy">("idle");
+  const [name, setName] = useState<string>("");
+
   const searchParams = useSearchParams();
 
-  const tags = searchParams
-    .getAll("type")
-    .map((type) => ({ id: type, name: type }));
+  const types = searchParams.getAll("type");
+  const id = searchParams.get("id");
+
+  useEffect(() => {
+    if (!id) return;
+
+    setState("busy");
+
+    codeSnippetsService
+      .getById(id)
+      .then((codeSnippet) => {
+        console.log({ codeSnippet });
+        setCode(codeSnippet.code);
+        setName(codeSnippet.name);
+        if (codeSnippet.icon) {
+          setIcon(codeSnippet.icon);
+        }
+      })
+      .catch(console.error)
+      .finally(() => {
+        setState("idle");
+      });
+  }, [id]);
+
+  const tags = types.map((type) => ({
+    id: type,
+    name: type.split("_").join(" ").toLocaleUpperCase(),
+  }));
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.stopPropagation();
     e.preventDefault();
 
+    setState("busy");
+
     codeSnippetsService
       .create({
         code,
-        name: e.currentTarget.elements.namedItem("name").value,
+        name,
+        icon,
+        predicate: {
+          $or: types.map((type) => ({ type })),
+        },
       })
-      .then((snippet) => {
-        console.log({ snippet });
+      .then(() => {
+        return miro.board.ui.closeModal();
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => {
+        setState("idle");
+      });
   };
 
   const handleCodeExecute = () => {
@@ -40,19 +100,43 @@ export default function CodeEditor() {
   };
 
   return (
-    <main>
+    <main className="flex flex-col gap-4 p-2">
+      <h1>Create snippet</h1>
       <form action="post" onSubmit={handleSubmit}>
-        <Button type="submit">Save</Button>
-        <Button
-          type="button"
-          onClick={handleCodeExecute}
-          variant="outline-prominent"
-        >
-          Execute
-        </Button>
-        <Tags tags={tags} />
-        <Input label="Name" name="name" />
-        <Editor onChange={setCode} />
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <IconSelector onSelect={setIcon} icon={icon} />
+
+            <Input
+              placeholder="Enter snippet name"
+              name="name"
+              autoComplete="off"
+              value={name}
+              onChange={(ev) => setName(ev.currentTarget.value)}
+              required
+              autoFocus
+            />
+          </div>
+          <div className="py-2">
+            <Tags tags={tags} />
+          </div>
+          <div className="h-80">
+            <Editor onChange={setCode} initialCode={code} />
+          </div>
+          <div className="flex flex-row justify-end gap-4">
+            <Button
+              type="button"
+              aria-busy={state === "busy"}
+              onClick={handleCodeExecute}
+              variant="outline-prominent"
+            >
+              Execute
+            </Button>
+            <Button aria-busy={state === "busy"} type="submit">
+              Publish
+            </Button>
+          </div>
+        </div>
       </form>
     </main>
   );

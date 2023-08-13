@@ -1,5 +1,5 @@
 // import { Membrane } from "./membrane";
-import { Workerbox } from "./workerbox";
+// import { Workerbox } from "./workerbox";
 import { Ses } from "./ses";
 // import { quickJS } from "./quickjs";
 
@@ -13,5 +13,6 @@ export const run = async (code: string) => {
   if (!runtime) {
     runtime = new Ses();
   }
+
   return runtime.execute(code);
 };

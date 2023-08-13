@@ -30,7 +30,6 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     MIRO_CLIENT_SECRET: process.env.MIRO_CLIENT_SECRET,
     NEXT_PUBLIC_MIRO_SDK: process.env.NEXT_PUBLIC_MIRO_SDK,
-    // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

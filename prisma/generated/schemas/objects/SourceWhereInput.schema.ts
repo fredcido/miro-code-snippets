@@ -2,6 +2,7 @@ import { z } from "zod";
 import { StringFilterObjectSchema } from "./StringFilter.schema";
 import { DateTimeFilterObjectSchema } from "./DateTimeFilter.schema";
 import { SnippetListRelationFilterObjectSchema } from "./SnippetListRelationFilter.schema";
+import { ShareConfigListRelationFilterObjectSchema } from "./ShareConfigListRelationFilter.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -39,6 +40,9 @@ const Schema: z.ZodType<Prisma.SourceWhereInput> = z
       .union([z.lazy(() => DateTimeFilterObjectSchema), z.coerce.date()])
       .optional(),
     Snippet: z.lazy(() => SnippetListRelationFilterObjectSchema).optional(),
+    ShareConfig: z
+      .lazy(() => ShareConfigListRelationFilterObjectSchema)
+      .optional(),
   })
   .strict();
 

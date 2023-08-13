@@ -5,13 +5,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator zod {
-  provider = "prisma-zod-generator"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+generator zod {
+  provider = "prisma-zod-generator"
 }
 
 enum SourceType {
@@ -20,13 +20,19 @@ enum SourceType {
   TEAM
 }
 
+enum SnippetStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model Source {
-  id        String    @id @default(cuid())
-  userId    String
-  boardId   String
-  teamId    String
-  createdAt DateTime  @default(now())
-  Snippet   Snippet[]
+  id          String        @id @default(cuid())
+  userId      String
+  boardId     String
+  teamId      String
+  createdAt   DateTime      @default(now())
+  Snippet     Snippet[]
+  ShareConfig ShareConfig[]
 
   @@unique([userId, boardId, teamId])
 }
@@ -39,6 +45,8 @@ model ShareConfig {
   updatedAt  DateTime   @updatedAt
   snippet    Snippet    @relation(fields: [snippetId], references: [id])
   snippetId  String
+  createdBy  Source     @relation(fields: [sourceId], references: [id])
+  sourceId   String
 }
 
 model Predicate {
@@ -54,10 +62,12 @@ model Snippet {
   id          String        @id @default(cuid())
   name        String
   code        String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
   createdBy   Source        @relation(fields: [sourceId], references: [id])
   sourceId    String
   ShareConfig ShareConfig[]
   Predicate   Predicate[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  icon        String
+  status      SnippetStatus
 }

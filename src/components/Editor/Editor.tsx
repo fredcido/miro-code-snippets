@@ -15,23 +15,40 @@ type Props = {
 
 export function Editor({ initialCode, onChange }: Props) {
   const beforeMount: BeforeMount = (monaco: Monaco) => {
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ES2015,
+      lib: ["es6"],
+    });
+
+    const contextTypes = `
+      type CodeSnippetContext = {
+        data: Record<string, unknown>
+      }
+      type Run = (context: CodeSnippetContext) => Promise<unknown>
+      declare global {
+        var run: Run
+      }
+    `;
+
+    const types = `${sdkTypes}${contextTypes}`;
+
     monaco.languages.typescript.typescriptDefaults.addExtraLib(
-      sdkTypes,
+      types,
       "@mirohq/websdk-types"
     );
   };
 
   return (
     <MonacoEditor
-      height="90%"
       defaultLanguage="typescript"
-      beforeMount={beforeMount}
+      className="rounded-lg"
       theme="vs-dark"
+      beforeMount={beforeMount}
+      onChange={onChange}
       options={{
         minimap: { enabled: false },
       }}
       defaultValue={initialCode}
-      onChange={onChange}
     />
   );
 }

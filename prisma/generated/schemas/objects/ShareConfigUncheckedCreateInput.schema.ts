@@ -11,6 +11,7 @@ const Schema: z.ZodType<Prisma.ShareConfigUncheckedCreateInput> = z
     createdAt: z.coerce.date().optional(),
     updatedAt: z.coerce.date().optional(),
     snippetId: z.string(),
+    sourceId: z.string(),
   })
   .strict();
 

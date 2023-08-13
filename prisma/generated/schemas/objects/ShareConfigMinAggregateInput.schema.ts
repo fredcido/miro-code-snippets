@@ -10,6 +10,7 @@ const Schema: z.ZodType<Prisma.ShareConfigMinAggregateInputType> = z
     createdAt: z.literal(true).optional(),
     updatedAt: z.literal(true).optional(),
     snippetId: z.literal(true).optional(),
+    sourceId: z.literal(true).optional(),
   })
   .strict();
 
