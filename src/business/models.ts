@@ -5,18 +5,17 @@ export const CreateCodeSnippetSchema = z.object({
   code: z.string(),
   icon: z.string().optional(),
   predicate: z.unknown(),
-  status: z.union([z.literal("draft"), z.literal("published")]),
-  visibility: z.union([
-    z.literal("private"),
-    z.literal("protected"),
-    z.literal("public"),
-  ]),
+  status: z.union([z.literal("DRAFT"), z.literal("PUBLISHED")]),
+  visibility: z
+    .union([z.literal("PRIVATE"), z.literal("PROTECTED"), z.literal("PUBLIC")])
+    .optional()
+    .default("PRIVATE"),
 });
 
 export const CodeSnippetSchema = CreateCodeSnippetSchema.extend({
   id: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 });
 
 export type CreateCodeSnippet = z.infer<typeof CreateCodeSnippetSchema>;

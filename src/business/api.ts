@@ -48,13 +48,13 @@ export const api = {
     config?: RequestInit
   ): Promise<LocalResponse> =>
     request<LocalResponse>(url, { method: "POST", data, ...config }),
-  patch: async <Payload extends BodyInit, LocalResponse = Response>(
+  patch: async <Payload, LocalResponse = Response>(
     url: string,
     data: Payload,
     config?: RequestInit
   ): Promise<LocalResponse> =>
     request<LocalResponse>(url, { method: "PATCH", data, ...config }),
-  put: async <Payload extends BodyInit, LocalResponse = Response>(
+  put: async <Payload, LocalResponse = Response>(
     url: string,
     data: Payload,
     config?: RequestInit

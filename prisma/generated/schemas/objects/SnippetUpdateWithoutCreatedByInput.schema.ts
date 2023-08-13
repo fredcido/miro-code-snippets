@@ -3,6 +3,8 @@ import { StringFieldUpdateOperationsInputObjectSchema } from "./StringFieldUpdat
 import { DateTimeFieldUpdateOperationsInputObjectSchema } from "./DateTimeFieldUpdateOperationsInput.schema";
 import { SnippetStatusSchema } from "../enums/SnippetStatus.schema";
 import { EnumSnippetStatusFieldUpdateOperationsInputObjectSchema } from "./EnumSnippetStatusFieldUpdateOperationsInput.schema";
+import { SnippetVisibilitySchema } from "../enums/SnippetVisibility.schema";
+import { EnumSnippetVisibilityFieldUpdateOperationsInputObjectSchema } from "./EnumSnippetVisibilityFieldUpdateOperationsInput.schema";
 import { ShareConfigUpdateManyWithoutSnippetNestedInputObjectSchema } from "./ShareConfigUpdateManyWithoutSnippetNestedInput.schema";
 import { PredicateUpdateManyWithoutSnippetNestedInputObjectSchema } from "./PredicateUpdateManyWithoutSnippetNestedInput.schema";
 
@@ -50,6 +52,14 @@ const Schema: z.ZodType<Prisma.SnippetUpdateWithoutCreatedByInput> = z
       .union([
         z.lazy(() => SnippetStatusSchema),
         z.lazy(() => EnumSnippetStatusFieldUpdateOperationsInputObjectSchema),
+      ])
+      .optional(),
+    visibility: z
+      .union([
+        z.lazy(() => SnippetVisibilitySchema),
+        z.lazy(
+          () => EnumSnippetVisibilityFieldUpdateOperationsInputObjectSchema
+        ),
       ])
       .optional(),
     ShareConfig: z

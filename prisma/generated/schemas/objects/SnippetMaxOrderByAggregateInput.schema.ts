@@ -13,6 +13,7 @@ const Schema: z.ZodType<Prisma.SnippetMaxOrderByAggregateInput> = z
     updatedAt: z.lazy(() => SortOrderSchema).optional(),
     icon: z.lazy(() => SortOrderSchema).optional(),
     status: z.lazy(() => SortOrderSchema).optional(),
+    visibility: z.lazy(() => SortOrderSchema).optional(),
   })
   .strict();
 

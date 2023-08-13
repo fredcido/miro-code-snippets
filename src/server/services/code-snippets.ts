@@ -72,10 +72,7 @@ export const codeSnippetsService = {
   },
   update: async (data: CodeSnippet): Promise<CodeSnippet> => {
     await prisma.snippet.update({
-      data: {
-        code: data.code,
-        name: data.name,
-      },
+      data,
       where: {
         id: data.id,
       },
@@ -149,6 +146,13 @@ export const codeSnippetsService = {
   },
   getById: async (id: CodeSnippet["id"]): Promise<Snippet> => {
     return await prisma.snippet.findUniqueOrThrow({
+      where: {
+        id,
+      },
+    });
+  },
+  delete: async (id: CodeSnippet["id"]): Promise<Snippet> => {
+    return await prisma.snippet.delete({
       where: {
         id,
       },

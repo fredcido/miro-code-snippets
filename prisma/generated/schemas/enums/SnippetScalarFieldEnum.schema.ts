@@ -9,4 +9,5 @@ export const SnippetScalarFieldEnumSchema = z.enum([
   "updatedAt",
   "icon",
   "status",
+  "visibility",
 ]);

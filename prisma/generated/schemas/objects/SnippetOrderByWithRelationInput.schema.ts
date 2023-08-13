@@ -16,6 +16,7 @@ const Schema: z.ZodType<Prisma.SnippetOrderByWithRelationInput> = z
     updatedAt: z.lazy(() => SortOrderSchema).optional(),
     icon: z.lazy(() => SortOrderSchema).optional(),
     status: z.lazy(() => SortOrderSchema).optional(),
+    visibility: z.lazy(() => SortOrderSchema).optional(),
     createdBy: z
       .lazy(() => SourceOrderByWithRelationInputObjectSchema)
       .optional(),

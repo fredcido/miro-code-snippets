@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { CodeSnippetSchema } from "~/business";
 import { codeSnippetsService } from "~/server/services/code-snippets";
 
 export default async function handler(
@@ -8,12 +9,17 @@ export default async function handler(
   const id = req.query.id as string;
   try {
     switch (req.method) {
-      case "PUT": {
-        const snippet = await codeSnippetsService.update(req.body);
+      case "PATCH": {
+        const codeSnippet = CodeSnippetSchema.parse(req.body);
+        const snippet = await codeSnippetsService.update(codeSnippet);
         return res.json(snippet);
       }
       case "GET": {
         const item = await codeSnippetsService.getById(id);
+        return res.json(item);
+      }
+      case "DELETE": {
+        const item = await codeSnippetsService.delete(id);
         return res.json(item);
       }
       default:

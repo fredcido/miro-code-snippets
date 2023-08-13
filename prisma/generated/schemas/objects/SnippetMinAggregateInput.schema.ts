@@ -12,6 +12,7 @@ const Schema: z.ZodType<Prisma.SnippetMinAggregateInputType> = z
     updatedAt: z.literal(true).optional(),
     icon: z.literal(true).optional(),
     status: z.literal(true).optional(),
+    visibility: z.literal(true).optional(),
   })
   .strict();
 

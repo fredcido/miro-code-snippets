@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { Editor } from "~/components/Editor";
 import { Input } from "~/components/Input";
 import {
-  CodeSnippet,
-  CreateCodeSnippet,
+  type CodeSnippet,
+  type CreateCodeSnippet,
   codeSnippetsService,
 } from "~/business";
 import { run } from "~/sandbox";
@@ -30,14 +30,11 @@ export default function CodeEditor() {
   const [snippet, setSnippet] = useState<CreateCodeSnippet>({
     code: initialCode,
     name: "",
-    status: "draft",
-    visibility: "private",
+    status: "DRAFT",
+    visibility: "PRIVATE",
     icon: "triangle-square-circle",
   });
-  const [code, setCode] = useState<string | undefined>(initialCode);
-  const [icon, setIcon] = useState<string>("triangle-square-circle");
   const [state, setState] = useState<"idle" | "busy">("idle");
-  const [name, setName] = useState<string>("");
 
   const searchParams = useSearchParams();
 
@@ -47,22 +44,22 @@ export default function CodeEditor() {
   useEffect(() => {
     if (!id) return;
 
-    setState("busy");
+    const loadCodeSnippet = () => {
+      setState("busy");
 
-    codeSnippetsService
-      .getById(id)
-      .then((codeSnippet) => {
-        console.log({ codeSnippet });
-        setCode(codeSnippet.code);
-        setName(codeSnippet.name);
-        if (codeSnippet.icon) {
-          setIcon(codeSnippet.icon);
-        }
-      })
-      .catch(console.error)
-      .finally(() => {
-        setState("idle");
-      });
+      codeSnippetsService
+        .getById(id)
+        .then((codeSnippet) => {
+          console.log({ codeSnippet });
+          setSnippet(codeSnippet);
+        })
+        .catch(console.error)
+        .finally(() => {
+          setState("idle");
+        });
+    };
+
+    loadCodeSnippet();
   }, [id]);
 
   const tags = types.map((type) => ({
@@ -76,43 +73,67 @@ export default function CodeEditor() {
 
     setState("busy");
 
-    codeSnippetsService
-      .create({
-        code,
-        name,
-        icon,
-        predicate: {
-          $or: types.map((type) => ({ type })),
-        },
-      })
-      .then(() => {
-        return miro.board.ui.closeModal();
-      })
-      .catch(console.error)
-      .finally(() => {
-        setState("idle");
-      });
+    if (id) {
+      codeSnippetsService
+        .update({
+          id,
+          ...snippet,
+        })
+        .then(() => {
+          return miro.board.ui.closeModal();
+        })
+        .catch(console.error)
+        .finally(() => {
+          setState("idle");
+        });
+    } else {
+      codeSnippetsService
+        .create({
+          ...snippet,
+          predicate: {
+            $or: types.map((type) => ({ type })),
+          },
+        })
+        .then(() => {
+          return miro.board.ui.closeModal();
+        })
+        .catch(console.error)
+        .finally(() => {
+          setState("idle");
+        });
+    }
   };
 
   const handleCodeExecute = () => {
-    if (!code) throw new Error("Code is invalid");
-    run(code).then(console.log).catch(console.error);
+    if (!snippet.code) throw new Error("Code is invalid");
+    run(snippet.code).then(console.log).catch(console.error);
   };
+
+  const handleChange =
+    <Prop extends keyof CodeSnippet, Value extends CodeSnippet[Prop]>(
+      prop: Prop
+    ) =>
+    (value?: Value) => {
+      setSnippet((snippet) => ({
+        ...snippet,
+        [prop]: value,
+      }));
+    };
 
   return (
     <main className="flex flex-col gap-4 p-2">
-      <h1>Create snippet</h1>
+      <h1>{id ? "Update" : "Create"} snippet</h1>
       <form action="post" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
-            <IconSelector onSelect={setIcon} icon={icon} />
+            <IconSelector onSelect={handleChange("icon")} icon={snippet.icon} />
 
             <Input
               placeholder="Enter snippet name"
               name="name"
               autoComplete="off"
-              value={name}
-              onChange={(ev) => setName(ev.currentTarget.value)}
+              value={snippet.name}
+              onChange={(ev) => handleChange("name")(ev.currentTarget.value)}
               required
               autoFocus
             />
@@ -120,19 +141,22 @@ export default function CodeEditor() {
           <div className="py-2">
             <Tags tags={tags} />
           </div>
-          <div className="h-80">
-            <Editor onChange={setCode} initialCode={code} />
+          <div className="h-80 rounded-md bg-[#1e1e1e] p-3">
+            <Editor
+              onChange={handleChange("code")}
+              initialCode={snippet.code}
+            />
           </div>
           <div className="flex flex-row justify-end gap-4">
             <Button
               type="button"
-              aria-busy={state === "busy"}
+              loading={state === "busy"}
               onClick={handleCodeExecute}
               variant="outline-prominent"
             >
               Execute
             </Button>
-            <Button aria-busy={state === "busy"} type="submit">
+            <Button loading={state === "busy"} type="submit">
               Publish
             </Button>
           </div>

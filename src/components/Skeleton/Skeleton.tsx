@@ -6,8 +6,8 @@ type Props = React.HTMLProps<HTMLDivElement> & {
 
 export default function Skeleton({ className }: Props) {
   return (
-    <div role="status" className="w-full animate-pulse">
-      <div className={`h-2.5 w-48 rounded-full bg-gray-200 ${className}`}></div>
+    <div role="status" className={`${className} w-full animate-pulse`}>
+      <div className={`${className} w-full rounded-md bg-gray-100`}></div>
       <span className="sr-only">Loading...</span>
     </div>
   );

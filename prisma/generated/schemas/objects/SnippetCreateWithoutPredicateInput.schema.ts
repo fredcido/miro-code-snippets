@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SnippetStatusSchema } from "../enums/SnippetStatus.schema";
+import { SnippetVisibilitySchema } from "../enums/SnippetVisibility.schema";
 import { SourceCreateNestedOneWithoutSnippetInputObjectSchema } from "./SourceCreateNestedOneWithoutSnippetInput.schema";
 import { ShareConfigCreateNestedManyWithoutSnippetInputObjectSchema } from "./ShareConfigCreateNestedManyWithoutSnippetInput.schema";
 
@@ -13,7 +14,8 @@ const Schema: z.ZodType<Prisma.SnippetCreateWithoutPredicateInput> = z
     createdAt: z.coerce.date().optional(),
     updatedAt: z.coerce.date().optional(),
     icon: z.string(),
-    status: z.lazy(() => SnippetStatusSchema),
+    status: z.lazy(() => SnippetStatusSchema).optional(),
+    visibility: z.lazy(() => SnippetVisibilitySchema).optional(),
     createdBy: z.lazy(
       () => SourceCreateNestedOneWithoutSnippetInputObjectSchema
     ),

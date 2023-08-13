@@ -10,6 +10,13 @@ export const codeSnippetsService = {
   >(
     snippet: Payload
   ): Promise<Output> => api.post<Payload, Output>(ENDPOINT, snippet),
+  update: async <Output extends CodeSnippet, Payload extends CodeSnippet>(
+    snippet: Payload
+  ): Promise<Output> =>
+    api.patch<Payload, Output>(`${ENDPOINT}/${snippet.id}`, snippet),
+  remove: async <Payload extends CodeSnippet>(
+    snippet: Payload
+  ): Promise<void> => api.delete(`${ENDPOINT}/${snippet.id}`),
   getById: async (id: string): Promise<CodeSnippet> =>
     api.get(`${ENDPOINT}/${id}`),
   getAll: async (): Promise<CodeSnippet[]> => api.get(ENDPOINT),

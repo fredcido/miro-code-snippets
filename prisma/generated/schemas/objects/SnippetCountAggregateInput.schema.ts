@@ -12,6 +12,7 @@ const Schema: z.ZodType<Prisma.SnippetCountAggregateInputType> = z
     updatedAt: z.literal(true).optional(),
     icon: z.literal(true).optional(),
     status: z.literal(true).optional(),
+    visibility: z.literal(true).optional(),
     _all: z.literal(true).optional(),
   })
   .strict();

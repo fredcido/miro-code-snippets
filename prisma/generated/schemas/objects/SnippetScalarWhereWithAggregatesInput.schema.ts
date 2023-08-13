@@ -3,6 +3,8 @@ import { StringWithAggregatesFilterObjectSchema } from "./StringWithAggregatesFi
 import { DateTimeWithAggregatesFilterObjectSchema } from "./DateTimeWithAggregatesFilter.schema";
 import { EnumSnippetStatusWithAggregatesFilterObjectSchema } from "./EnumSnippetStatusWithAggregatesFilter.schema";
 import { SnippetStatusSchema } from "../enums/SnippetStatus.schema";
+import { EnumSnippetVisibilityWithAggregatesFilterObjectSchema } from "./EnumSnippetVisibilityWithAggregatesFilter.schema";
+import { SnippetVisibilitySchema } from "../enums/SnippetVisibility.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -55,6 +57,12 @@ const Schema: z.ZodType<Prisma.SnippetScalarWhereWithAggregatesInput> = z
       .union([
         z.lazy(() => EnumSnippetStatusWithAggregatesFilterObjectSchema),
         z.lazy(() => SnippetStatusSchema),
+      ])
+      .optional(),
+    visibility: z
+      .union([
+        z.lazy(() => EnumSnippetVisibilityWithAggregatesFilterObjectSchema),
+        z.lazy(() => SnippetVisibilitySchema),
       ])
       .optional(),
   })

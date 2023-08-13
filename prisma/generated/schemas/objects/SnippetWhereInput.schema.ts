@@ -3,6 +3,8 @@ import { StringFilterObjectSchema } from "./StringFilter.schema";
 import { DateTimeFilterObjectSchema } from "./DateTimeFilter.schema";
 import { EnumSnippetStatusFilterObjectSchema } from "./EnumSnippetStatusFilter.schema";
 import { SnippetStatusSchema } from "../enums/SnippetStatus.schema";
+import { EnumSnippetVisibilityFilterObjectSchema } from "./EnumSnippetVisibilityFilter.schema";
+import { SnippetVisibilitySchema } from "../enums/SnippetVisibility.schema";
 import { SourceRelationFilterObjectSchema } from "./SourceRelationFilter.schema";
 import { SourceWhereInputObjectSchema } from "./SourceWhereInput.schema";
 import { ShareConfigListRelationFilterObjectSchema } from "./ShareConfigListRelationFilter.schema";
@@ -53,6 +55,12 @@ const Schema: z.ZodType<Prisma.SnippetWhereInput> = z
       .union([
         z.lazy(() => EnumSnippetStatusFilterObjectSchema),
         z.lazy(() => SnippetStatusSchema),
+      ])
+      .optional(),
+    visibility: z
+      .union([
+        z.lazy(() => EnumSnippetVisibilityFilterObjectSchema),
+        z.lazy(() => SnippetVisibilitySchema),
       ])
       .optional(),
     createdBy: z

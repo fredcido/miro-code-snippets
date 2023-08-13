@@ -29,7 +29,7 @@ export function IconSelector({
     e.preventDefault();
 
     setFilter(e.target.value);
-  }, 300);
+  }, 200);
 
   return (
     <DropdownMenu onOpen={() => setFilter("")}>

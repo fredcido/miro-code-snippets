@@ -3,6 +3,8 @@ import { StringFilterObjectSchema } from "./StringFilter.schema";
 import { DateTimeFilterObjectSchema } from "./DateTimeFilter.schema";
 import { EnumSnippetStatusFilterObjectSchema } from "./EnumSnippetStatusFilter.schema";
 import { SnippetStatusSchema } from "../enums/SnippetStatus.schema";
+import { EnumSnippetVisibilityFilterObjectSchema } from "./EnumSnippetVisibilityFilter.schema";
+import { SnippetVisibilitySchema } from "../enums/SnippetVisibility.schema";
 
 import type { Prisma } from "@prisma/client";
 
@@ -49,6 +51,12 @@ const Schema: z.ZodType<Prisma.SnippetScalarWhereInput> = z
       .union([
         z.lazy(() => EnumSnippetStatusFilterObjectSchema),
         z.lazy(() => SnippetStatusSchema),
+      ])
+      .optional(),
+    visibility: z
+      .union([
+        z.lazy(() => EnumSnippetVisibilityFilterObjectSchema),
+        z.lazy(() => SnippetVisibilitySchema),
       ])
       .optional(),
   })
