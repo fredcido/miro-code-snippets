@@ -39,6 +39,7 @@ export function IconSelector({
           type="button"
           variant="solid-subtle"
           size="x-large"
+          tooltipSide="top"
         >
           <Icon icon={icon} />
         </IconButton>

@@ -6,14 +6,20 @@ import type {
   UserInfo,
 } from "~/business/models";
 import { prisma } from "../db";
+import { env } from "~/env.mjs";
 
-const snippetToCodeSnippet = (snippet: Snippet): CodeSnippet => ({
+const snippetToCodeSnippet = <DataSnippet extends Snippet>(
+  snippet: DataSnippet
+): CodeSnippet => ({
   id: snippet.id,
   code: snippet.code,
   name: snippet.name,
   createdAt: snippet.createdAt.toDateString(),
   updatedAt: snippet.updatedAt.toDateString(),
+  status: snippet.status,
+  visibility: snippet.visibility,
   icon: snippet.icon,
+  predicate: snippet.Predicate,
 });
 
 export const codeSnippetsService = {
@@ -21,7 +27,7 @@ export const codeSnippetsService = {
     data: CreateCodeSnippet,
     userInfo: UserInfo,
     boardId: string
-  ): Promise<CodeSnippet> => {
+  ): Promise<Snippet> => {
     const { predicate, ...rest } = data;
     const sourceData = {
       boardId: boardId,
@@ -29,11 +35,10 @@ export const codeSnippetsService = {
       teamId: userInfo.team,
     };
 
-    const snippet = await prisma.snippet.create({
+    return prisma.snippet.create({
       data: {
         ...rest,
         icon: data.icon ?? "",
-        status: "PUBLISHED",
         createdBy: {
           connectOrCreate: {
             create: sourceData,
@@ -66,25 +71,80 @@ export const codeSnippetsService = {
           ],
         },
       },
+      include: {
+        ShareConfig: {
+          select: {
+            id: true,
+            sourceType: true,
+          },
+        },
+        Predicate: {
+          select: {
+            predicate: true,
+          },
+        },
+      },
     });
-
-    return snippetToCodeSnippet(snippet);
   },
-  update: async (data: CodeSnippet): Promise<CodeSnippet> => {
-    await prisma.snippet.update({
+  update: async (data: CodeSnippet): Promise<Snippet> => {
+    return prisma.snippet.update({
       data,
+      include: {
+        ShareConfig: {
+          select: {
+            id: true,
+            sourceType: true,
+          },
+        },
+        Predicate: {
+          select: {
+            predicate: true,
+          },
+        },
+      },
       where: {
         id: data.id,
       },
     });
-
-    return data;
   },
-  getAll: async (): Promise<CodeSnippet[]> => {
+  getMine: async (userInfo: UserInfo): Promise<Snippet[]> => {
+    return prisma.snippet.findMany({
+      include: {
+        ShareConfig: {
+          select: {
+            id: true,
+            sourceType: true,
+          },
+        },
+        Predicate: {
+          select: {
+            predicate: true,
+          },
+        },
+      },
+      where: {
+        OR: [
+          {
+            // User has adopted
+            ShareConfig: {
+              some: {
+                sourceType: "USER",
+                identifier: userInfo.user,
+              },
+            },
+          },
+        ],
+      },
+    });
+  },
+  getAll: async (): Promise<Snippet[]> => {
     return (await prisma.snippet.findMany()).map(snippetToCodeSnippet);
   },
-  getActions: async (userInfo: UserInfo, boardId: string): Promise<unknown> => {
-    const snippets = await prisma.snippet.findMany({
+  getActions: async (
+    userInfo: UserInfo,
+    boardId: string
+  ): Promise<Snippet[]> => {
+    return prisma.snippet.findMany({
       include: {
         ShareConfig: {
           select: {
@@ -137,15 +197,24 @@ export const codeSnippetsService = {
           },
         ],
       },
+      take: env.MAX_ACTIONS,
     });
-
-    return snippets.map((snippet) => ({
-      ...snippetToCodeSnippet(snippet),
-      predicate: snippet.Predicate.map((p) => p.predicate),
-    }));
   },
   getById: async (id: CodeSnippet["id"]): Promise<Snippet> => {
     return await prisma.snippet.findUniqueOrThrow({
+      include: {
+        ShareConfig: {
+          select: {
+            id: true,
+            sourceType: true,
+          },
+        },
+        Predicate: {
+          select: {
+            predicate: true,
+          },
+        },
+      },
       where: {
         id,
       },

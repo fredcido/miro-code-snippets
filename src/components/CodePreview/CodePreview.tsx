@@ -6,9 +6,11 @@ import {
   IconPen,
   IconTrash,
   IconPlayCircle,
+  Tooltip,
 } from "@mirohq/design-system";
 import { type CodeSnippet } from "~/business";
 import { Icon } from "../Icon";
+import { Tags, type TagType } from "../Tags";
 
 type Props = {
   codeSnippet: CodeSnippet;
@@ -23,17 +25,37 @@ export function CodePreview({
   onExecute,
   onRemove,
 }: Props) {
+  const tags: TagType[] = [];
+
+  if (codeSnippet.status === "DRAFT") {
+    tags.push({
+      id: "draft",
+      name: "DRAFT",
+    });
+  }
+
   return (
     <section className="rounded-md bg-slate-50 p-3">
-      <h2 className="flex items-center gap-2">
+      <h2 className="flex items-center gap-2 text-lg">
         <Icon icon={codeSnippet.icon ?? "cog"} />
         <span title={codeSnippet.name} className="truncate">
-          {codeSnippet.name}
+          <Tooltip>
+            <Tooltip.Trigger>{codeSnippet.name}</Tooltip.Trigger>
+            <Tooltip.Content>
+              {codeSnippet.status === "DRAFT" && `[DRAFT] `}
+              {codeSnippet.name}
+            </Tooltip.Content>
+          </Tooltip>
         </span>
         <div className="ml-auto">
           <DropdownMenu>
             <DropdownMenu.Trigger asChild>
-              <IconButton label="Actions" type="button" variant="solid-subtle">
+              <IconButton
+                label="Actions"
+                type="button"
+                variant="solid-subtle"
+                tooltipSide="top"
+              >
                 <IconDotsThree />
               </IconButton>
             </DropdownMenu.Trigger>
@@ -65,6 +87,7 @@ export function CodePreview({
           </DropdownMenu>
         </div>
       </h2>
+      <Tags tags={tags} />
     </section>
   );
 }

@@ -1,10 +1,22 @@
 import { z } from "zod";
 
+const ValueSchema = z.unknown();
+
+const PredicateSchema: z.ZodTypeAny = z.lazy(() =>
+  z.union([
+    z.record(ValueSchema),
+    z.object({
+      $and: z.array(PredicateSchema).optional(),
+      $or: z.array(PredicateSchema).optional(),
+    }),
+  ])
+);
+
 export const CreateCodeSnippetSchema = z.object({
   name: z.string(),
   code: z.string(),
   icon: z.string().optional(),
-  predicate: z.unknown(),
+  predicate: PredicateSchema,
   status: z.union([z.literal("DRAFT"), z.literal("PUBLISHED")]),
   visibility: z
     .union([z.literal("PRIVATE"), z.literal("PROTECTED"), z.literal("PUBLIC")])

@@ -9,6 +9,7 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     MIRO_CLIENT_SECRET: z.string(),
+    MAX_ACTIONS: z.coerce.number(),
     NODE_ENV: z.enum(["development", "test", "production"]),
   },
 
@@ -30,6 +31,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     MIRO_CLIENT_SECRET: process.env.MIRO_CLIENT_SECRET,
     NEXT_PUBLIC_MIRO_SDK: process.env.NEXT_PUBLIC_MIRO_SDK,
+    MAX_ACTIONS: process.env.MAX_ACTIONS,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

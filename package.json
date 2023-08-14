@@ -13,6 +13,7 @@
     "svg:copy": "copyfiles --flat ./node_modules/@mirohq/design-system-icons/svg/24/*.svg ./public/icons/"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.16",
     "@locker/near-membrane-dom": "^0.12.15",
     "@mirohq/design-system": "^0.14.2",
     "@mirohq/websdk-types": "^2.9.2",

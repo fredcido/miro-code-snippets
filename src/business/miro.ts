@@ -1,7 +1,8 @@
 import type { CustomAction, CustomEvent } from "@mirohq/websdk-types";
-import { codeSnippetsService } from "./business";
+import { type CodeSnippet, codeSnippetsService } from ".";
 import slug from "slug";
 import { run } from "~/sandbox";
+import { getRegistry } from "./actions";
 
 export const handleIconClick = () => {
   miro.board.ui
@@ -35,33 +36,31 @@ const registerAction = async (
   await miro.board.experimental.action.register(action);
 };
 
+const registerSnippetAsAction = async (snippet: CodeSnippet) => {
+  return registerAction(
+    {
+      event: slug(snippet.name),
+      ui: {
+        label: snippet.name,
+        icon: snippet.icon ?? "cog",
+      },
+      predicate: snippet.predicate,
+    },
+    runCode(snippet)
+  ).catch(console.error);
+};
+
+const runCode = (snippet: CodeSnippet) => () => {
+  void miro.board.notifications.showInfo(`Triggered ${snippet.name}`);
+  run(snippet.code).catch((error) => {
+    void miro.board.notifications.showError(`Error: ${error}`);
+  });
+};
+
 export const registerCustomActions = async () => {
   try {
     const actions = await codeSnippetsService.getActions();
-
-    actions.map((action) => {
-      const runCode = () => {
-        miro.board.notifications.showInfo(`Triggered ${action.name}`);
-        console.log(action.code);
-        run(action.code).catch((error) => {
-          miro.board.notifications.showError(`Error: ${error}`);
-        });
-      };
-
-      registerAction(
-        {
-          event: slug(action.name),
-          ui: {
-            label: action.name,
-            icon: action.icon ?? "cog",
-          },
-          predicate: {
-            $or: action.predicate,
-          },
-        },
-        runCode
-      ).catch(console.error);
-    });
+    actions.map(registerSnippetAsAction);
   } catch (error) {
     console.error(error);
   }
@@ -71,9 +70,8 @@ export const registerCustomActions = async () => {
       event: "create-snippet",
       ui: {
         label: "Create snippet",
-        icon: "cog",
-        description:
-          "Create your code snippet using WebSDK directly on the Miro board",
+        icon: "lightning",
+        description: "Create code snippets directly on the board",
       },
       predicate: {
         $or: [
@@ -115,8 +113,11 @@ export const init = async () => {
     miro.board.ui.on("icon:click", handleIconClick);
     const unsuscribeActions = await registerCustomActions();
 
+    getRegistry().on("snippet:created", registerSnippetAsAction);
+
     return () => {
       miro.board.ui.off("icon:click", handleIconClick);
+      getRegistry().off("snippet:created", registerSnippetAsAction);
       unsuscribeActions();
     };
   } catch (error) {

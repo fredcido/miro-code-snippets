@@ -5,19 +5,48 @@ import { CodePreview } from "~/components/CodePreview";
 import { codeSnippetsService } from "~/business/services/CodeSnippets";
 import { Input } from "~/components/Input";
 import { debounce } from "lodash";
+import { getRegistry } from "~/business/actions";
 
 export default function CodeEditor() {
   const [items, setItems] = useState<CodeSnippet[]>([]);
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    codeSnippetsService.getAll().then(setItems).catch(console.error);
+    // eslint-disable-next-line @typescript-eslint/require-await
+    const newSnippet = async (snippet: CodeSnippet) => {
+      setItems((items) => [snippet, ...items]);
+    };
+
+    // eslint-disable-next-line @typescript-eslint/require-await
+    const snippetUpdated = async (snippet: CodeSnippet) => {
+      setItems((items) => {
+        return items.map((item) => {
+          if (item.id === snippet.id) {
+            return snippet;
+          }
+
+          return item;
+        });
+      });
+    };
+
+    getRegistry().on("snippet:created", newSnippet);
+    getRegistry().on("snippet:updated", snippetUpdated);
+
+    codeSnippetsService.getMine().then(setItems).catch(console.error);
+
+    return () => {
+      getRegistry().off("snippet:created", newSnippet);
+      getRegistry().off("snippet:updated", snippetUpdated);
+    };
   }, []);
 
   const filteredItems = useMemo(() => {
     if (!filter.trim().length) return items;
 
-    return items.filter((item) => item.name.includes(filter));
+    return items.filter((item) =>
+      item.name.toLocaleLowerCase().includes(filter)
+    );
   }, [filter, items]);
 
   const handleEdit = (code: CodeSnippet) => {
@@ -51,7 +80,7 @@ export default function CodeEditor() {
   }, 200);
 
   return (
-    <main className="flex flex-col gap-4 p-6">
+    <main className="flex flex-col gap-4 px-6 py-1">
       <Input
         placeholder="Search..."
         name="icon"

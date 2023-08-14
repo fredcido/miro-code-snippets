@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useEffect } from "react";
-import { init } from "~/miro";
+import { init } from "~/business/miro";
 
 export default function Home() {
   useEffect(() => {

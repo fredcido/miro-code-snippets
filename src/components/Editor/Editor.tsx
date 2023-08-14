@@ -9,11 +9,11 @@ import {
 import sdkTypes from "raw-loader!@mirohq/websdk-types/dist/index.d.ts?raw-loader";
 
 type Props = {
-  initialCode?: string;
+  code?: string;
   onChange?: OnChange;
 };
 
-export function Editor({ initialCode, onChange }: Props) {
+export function Editor({ code, onChange }: Props) {
   const beforeMount: BeforeMount = (monaco: Monaco) => {
     monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
       target: monaco.languages.typescript.ScriptTarget.ES2015,
@@ -48,7 +48,7 @@ export function Editor({ initialCode, onChange }: Props) {
       options={{
         minimap: { enabled: false },
       }}
-      defaultValue={initialCode}
+      value={code}
     />
   );
 }

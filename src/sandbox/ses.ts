@@ -7,7 +7,9 @@ export class Ses implements Sandbox {
   }
   async execute(code: string) {
     const c = new Compartment({
-      print: harden(console.log),
+      console: harden(console),
+      setTimeout: harden(window.setTimeout),
+      setInterval: harden(window.setInterval),
       miro: harden(miro),
     });
 
