@@ -16,15 +16,16 @@ import { Tag, type TagType, Tags } from "~/components/Tags";
 import { IconSelector } from "~/components/IconSelector";
 import { debounce } from "lodash";
 import { getRegistry } from "~/business/actions";
-import { typeToCleanName } from "~/business/utils";
+import { predicateToTags, typeToCleanName } from "~/business/utils";
 import { Alert, type Message } from "~/components/Alert";
+import { SnippetFormSkeleton } from "~/components/Skeleton/SnippetFormSkeleton";
 
 const initialCode = `// Write your code here
 miro.board.notifications.showInfo("Hey there from my Snippet!")`;
 
 export default function CodeEditor() {
   const searchParams = useSearchParams();
-  const types = searchParams.getAll("type");
+  const [tags, setTags] = useState<TagType[]>([]);
   const [id, setId] = useState(searchParams.get("id"));
   const [message, setMessage] = useState<Message | undefined>();
   const [snippet, setSnippet] = useState<CreateCodeSnippet>({
@@ -37,7 +38,10 @@ export default function CodeEditor() {
   const [state, setState] = useState<"idle" | "busy" | "ready">("idle");
 
   useEffect(() => {
-    if (!id || state !== "idle") return;
+    if (!id || state !== "idle") {
+      setState("ready");
+      return;
+    }
 
     const loadCodeSnippet = () => {
       setState("busy");
@@ -46,8 +50,15 @@ export default function CodeEditor() {
         .getById(id)
         .then((codeSnippet) => {
           setSnippet(codeSnippet);
+          setTags(predicateToTags(codeSnippet.predicate ?? {}));
         })
-        .catch(console.error)
+        .catch((error) => {
+          console.error(error);
+          setMessage({
+            content: "Error executing code snippet.",
+            variant: "danger",
+          });
+        })
         .finally(() => {
           setState("ready");
         });
@@ -56,11 +67,16 @@ export default function CodeEditor() {
     loadCodeSnippet();
   }, [id, state, setState]);
 
-  const tags = types.map((type) => ({
-    id: type,
-    name: typeToCleanName(type),
-    variant: "info",
-  })) as TagType[];
+  const urlTypes = searchParams.getAll("type");
+  useEffect(() => {
+    const tags = urlTypes.map((type) => ({
+      id: type,
+      name: typeToCleanName(type),
+      variant: "info",
+    })) as TagType[];
+
+    setTags(tags);
+  }, [urlTypes]);
 
   const saveSnippet = useCallback(
     async (data: CreateCodeSnippet) => {
@@ -72,9 +88,9 @@ export default function CodeEditor() {
             id,
             ...data,
           })
-          .then((snippet) => {
-            getRegistry().broadcast("snippet:updated", snippet);
-            return snippet;
+          .then((latest) => {
+            getRegistry().broadcast("snippet:updated", latest);
+            return latest;
           })
           .finally(() => {
             setState("ready");
@@ -84,12 +100,12 @@ export default function CodeEditor() {
           .create({
             ...data,
             predicate: {
-              $or: types.map((type) => ({ type })),
+              $or: urlTypes.map((type) => ({ type })),
             },
           })
-          .then((snippet) => {
-            getRegistry().broadcast("snippet:created", snippet);
-            return snippet;
+          .then((latest) => {
+            getRegistry().broadcast("snippet:created", latest);
+            return latest;
           })
           .finally(() => {
             setState("ready");
@@ -104,14 +120,15 @@ export default function CodeEditor() {
     e.preventDefault();
 
     saveSnippet({ ...snippet, status: "PUBLISHED" })
-      .then((snippet) => {
-        setSnippet(snippet);
+      .then((latest) => {
+        setSnippet(latest);
         setMessage({
           content: "Code snippet published.",
           variant: "success",
         });
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error(error);
         setMessage({
           content: "Error publishing code snippet.",
           variant: "danger",
@@ -121,7 +138,15 @@ export default function CodeEditor() {
 
   const handleCodeExecute = () => {
     if (!snippet.code) throw new Error("Code is invalid");
-    run(snippet.code).then(console.log).catch(console.error);
+    run(snippet.code)
+      .then(console.log)
+      .catch((error) => {
+        console.error(error);
+        setMessage({
+          content: "Error executing code snippet.",
+          variant: "danger",
+        });
+      });
   };
 
   const saveDebounced = useCallback(
@@ -158,9 +183,11 @@ export default function CodeEditor() {
 
   const isDraftSaved = state === "ready" && snippet.status === "DRAFT" && id;
 
-  return (
+  return state == "idle" ? (
+    <SnippetFormSkeleton />
+  ) : (
     <main className="flex flex-col gap-4 p-2">
-      <h1 className="flex gap-3 text-2xl">
+      <h1 className="flex gap-3 text-2xl font-bold">
         {id ? "Update" : "Create"} snippet
         {isDraftSaved && <Tag tag={{ id: "DRAFT", name: "DRAFT" }} />}
       </h1>
