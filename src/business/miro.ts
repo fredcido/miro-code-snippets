@@ -37,6 +37,8 @@ const registerAction = async (
 };
 
 const registerSnippetAsAction = async (snippet: CodeSnippet) => {
+  if (snippet.status === "DRAFT") return;
+
   return registerAction(
     {
       event: slug(snippet.name),
@@ -114,6 +116,7 @@ export const init = async () => {
     const unsuscribeActions = await registerCustomActions();
 
     getRegistry().on("snippet:created", registerSnippetAsAction);
+    getRegistry().on("snippet:updated", registerSnippetAsAction);
 
     return () => {
       miro.board.ui.off("icon:click", handleIconClick);

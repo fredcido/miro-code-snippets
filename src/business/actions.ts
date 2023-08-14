@@ -42,6 +42,7 @@ export class ActionsRegistry {
     this.channel.addEventListener("message", (message) => {
       try {
         const action = ActionsSchema.parse(message.data);
+        console.log("ACTION.INCOMING", { action });
         this.dispatch(action.type, action.payload);
       } catch (error) {
         console.error(`Error parsing action payload`, error);
@@ -86,6 +87,8 @@ export class ActionsRegistry {
     };
 
     ActionsSchema.parse(message);
+
+    console.log("ACTION.BROADCAST", { message });
     this.channel.postMessage(message);
   }
 
