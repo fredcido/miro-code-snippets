@@ -104,7 +104,8 @@ export default function CodeEditor() {
     e.preventDefault();
 
     saveSnippet({ ...snippet, status: "PUBLISHED" })
-      .then(() => {
+      .then((snippet) => {
+        setSnippet(snippet);
         setMessage({
           content: "Code snippet published.",
           variant: "success",
@@ -159,7 +160,7 @@ export default function CodeEditor() {
 
   return (
     <main className="flex flex-col gap-4 p-2">
-      <h1 className="flex gap-3">
+      <h1 className="flex gap-3 text-2xl">
         {id ? "Update" : "Create"} snippet
         {isDraftSaved && <Tag tag={{ id: "DRAFT", name: "DRAFT" }} />}
       </h1>
@@ -204,7 +205,9 @@ export default function CodeEditor() {
           </div>
           <div className="h-14">
             {message && (
-              <Alert variant={message.variant}>{message.content}</Alert>
+              <Alert variant={message.variant}>
+                <div className="font-bold">{message.content}</div>
+              </Alert>
             )}
           </div>
         </div>
