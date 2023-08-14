@@ -6,6 +6,8 @@ import { codeSnippetsService } from "~/business/services/CodeSnippets";
 import { Input } from "~/components/Input";
 import { debounce } from "lodash";
 import { getRegistry } from "~/business/actions";
+import { Alert } from "~/components/Alert";
+import { IconButton, IconPlus } from "@mirohq/design-system";
 
 export default function CodeEditor() {
   const [items, setItems] = useState<CodeSnippet[]>([]);
@@ -58,6 +60,15 @@ export default function CodeEditor() {
       .catch(console.error);
   };
 
+  const handleAdd = () => {
+    miro.board.ui
+      .openModal({
+        url: `/code-editor`,
+        width: 800,
+      })
+      .catch(console.error);
+  };
+
   const handleRemove = (code: CodeSnippet) => {
     if (!confirm(`Are you sure you want to remove "${code.name}"`)) {
       return false;
@@ -80,7 +91,7 @@ export default function CodeEditor() {
   }, 200);
 
   return (
-    <main className="flex flex-col gap-4 px-6 py-1">
+    <section className="px-6 py-1">
       <Input
         placeholder="Search..."
         name="icon"
@@ -90,14 +101,31 @@ export default function CodeEditor() {
         onChange={handleFilter}
         autoFocus
       />
-      {filteredItems.map((item) => (
-        <CodePreview
-          key={item.id}
-          codeSnippet={item}
-          onEdit={() => handleEdit(item)}
-          onRemove={() => handleRemove(item)}
-        />
-      ))}
-    </main>
+      <main className="flex max-h-[32em] flex-col gap-4 overflow-auto py-2">
+        {filteredItems.length < 1 && (
+          <div className="py-6">
+            <Alert variant="idle">No code snippets available.</Alert>
+          </div>
+        )}
+
+        {filteredItems.map((item) => (
+          <CodePreview
+            key={item.id}
+            codeSnippet={item}
+            onEdit={() => handleEdit(item)}
+            onRemove={() => handleRemove(item)}
+          />
+        ))}
+      </main>
+      <footer className="flex justify-end py-2">
+        <IconButton
+          variant="solid-prominent"
+          label="Add Snippet"
+          onClick={handleAdd}
+        >
+          <IconPlus />
+        </IconButton>
+      </footer>
+    </section>
   );
 }

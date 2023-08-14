@@ -22,11 +22,13 @@ type Props = {
 export function Tag({ tag, onRemove }: Props) {
   return (
     <span
-      className="tag font-bold"
-      style={{
-        "--background": colorMap[tag.variant ?? "idle"],
-        "--color": "var(--white)",
-      }}
+      className="tag font-bold uppercase"
+      style={
+        {
+          "--color": "var(--white)",
+          "--background": colorMap[tag.variant ?? "idle"],
+        } as React.CSSProperties
+      }
     >
       {tag.name}
       {onRemove && (

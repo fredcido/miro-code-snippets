@@ -11,6 +11,7 @@ import {
 import { type CodeSnippet } from "~/business";
 import { Icon } from "../Icon";
 import { Tags, type TagType } from "../Tags";
+import { predicateToTags } from "~/business/utils";
 
 type Props = {
   codeSnippet: CodeSnippet;
@@ -32,6 +33,11 @@ export function CodePreview({
       id: "draft",
       name: "DRAFT",
     });
+  }
+
+  if (codeSnippet.predicate) {
+    const widgetTags = predicateToTags(codeSnippet.predicate);
+    widgetTags.forEach((tag) => tags.push(tag));
   }
 
   return (

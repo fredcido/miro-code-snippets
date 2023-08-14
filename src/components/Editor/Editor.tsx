@@ -15,9 +15,9 @@ type Props = {
 
 export function Editor({ code, onChange }: Props) {
   const beforeMount: BeforeMount = (monaco: Monaco) => {
-    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-      target: monaco.languages.typescript.ScriptTarget.ES2015,
-      lib: ["es6"],
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      noLib: true,
+      allowNonTsExtensions: true,
     });
 
     const contextTypes = `

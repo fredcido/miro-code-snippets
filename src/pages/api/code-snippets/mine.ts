@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { CreateCodeSnippetSchema } from "~/business/models";
 import { extractUser } from "~/server/auth";
 import { codeSnippetsService } from "~/server/services/code-snippets";
 

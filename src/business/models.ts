@@ -1,28 +1,53 @@
 import { z } from "zod";
 
-const ValueSchema = z.unknown();
+const ValueSchema = z.record(z.string(), z.unknown());
+type PredicateValue = z.infer<typeof ValueSchema>;
 
-const PredicateSchema: z.ZodTypeAny = z.lazy(() =>
-  z.union([
-    z.record(ValueSchema),
-    z.object({
-      $and: z.array(PredicateSchema).optional(),
-      $or: z.array(PredicateSchema).optional(),
-    }),
-  ])
+export type Predicate = {
+  $and?: PredicateValue[];
+  $or?: PredicateValue[];
+};
+
+const RecursivePredicateSchema: z.Schema<Predicate> = z.lazy(() =>
+  z.object({
+    $and: z.array(ValueSchema).optional(),
+    $or: z.array(ValueSchema).optional(),
+  })
 );
 
-export const CreateCodeSnippetSchema = z.object({
-  name: z.string(),
-  code: z.string(),
-  icon: z.string().optional(),
-  predicate: PredicateSchema,
-  status: z.union([z.literal("DRAFT"), z.literal("PUBLISHED")]),
-  visibility: z
-    .union([z.literal("PRIVATE"), z.literal("PROTECTED"), z.literal("PUBLIC")])
-    .optional()
-    .default("PRIVATE"),
-});
+const PredicateSchema = z.union([
+  z.record(ValueSchema),
+  RecursivePredicateSchema,
+]);
+
+const ShareConfigSchema = z
+  .object({
+    sourceType: z.union([
+      z.literal("USER"),
+      z.literal("BOARD"),
+      z.literal("TEAM"),
+    ]),
+    identifier: z.string(),
+  })
+  .strict();
+
+const VisibilitySchema = z.union([
+  z.literal("PRIVATE"),
+  z.literal("PROTECTED"),
+  z.literal("PUBLIC"),
+]);
+
+export const CreateCodeSnippetSchema = z
+  .object({
+    name: z.string(),
+    code: z.string(),
+    icon: z.string().optional(),
+    status: z.union([z.literal("DRAFT"), z.literal("PUBLISHED")]),
+    visibility: VisibilitySchema.default("PRIVATE").optional(),
+    predicate: PredicateSchema.default({}).optional(),
+    shareConfig: z.array(ShareConfigSchema).default([]).optional(),
+  })
+  .strict();
 
 export const CodeSnippetSchema = CreateCodeSnippetSchema.extend({
   id: z.string(),

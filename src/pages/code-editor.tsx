@@ -12,18 +12,26 @@ import {
   codeSnippetsService,
 } from "~/business";
 import { run } from "~/sandbox";
-import { Tags } from "~/components/Tags";
+import { Tag, TagType, Tags } from "~/components/Tags";
 import { IconSelector } from "~/components/IconSelector";
 import { debounce } from "lodash";
 import { getRegistry } from "~/business/actions";
+import { typeToCleanName } from "~/business/utils";
+import { Alert, type AlertVariant } from "~/components/Alert";
 
 const initialCode = `// Write your code here
 miro.board.notifications.showInfo("Hey there from my Snippet!")`;
+
+type Message = {
+  variant: AlertVariant;
+  content: string;
+};
 
 export default function CodeEditor() {
   const searchParams = useSearchParams();
   const types = searchParams.getAll("type");
   const [id, setId] = useState(searchParams.get("id"));
+  const [message, setMessage] = useState<Message | undefined>();
   const [snippet, setSnippet] = useState<CreateCodeSnippet>({
     code: initialCode,
     name: "",
@@ -55,8 +63,9 @@ export default function CodeEditor() {
 
   const tags = types.map((type) => ({
     id: type,
-    name: type.split("_").join(" ").toLocaleUpperCase(),
-  }));
+    name: typeToCleanName(type),
+    variant: "info",
+  })) as TagType[];
 
   const saveSnippet = useCallback(
     async (data: CreateCodeSnippet) => {
@@ -101,9 +110,17 @@ export default function CodeEditor() {
 
     saveSnippet({ ...snippet, status: "PUBLISHED" })
       .then(() => {
-        return miro.board.ui.closeModal();
+        setMessage({
+          content: "Code snippet published.",
+          variant: "success",
+        });
       })
-      .catch(console.error);
+      .catch(() => {
+        setMessage({
+          content: "Error publishing code snippet.",
+          variant: "danger",
+        });
+      });
   };
 
   const handleCodeExecute = () => {
@@ -119,6 +136,7 @@ export default function CodeEditor() {
       saveSnippet({ ...data, status: "DRAFT" })
         .then((snippet) => {
           setId(snippet.id);
+          setSnippet((snippet) => ({ ...snippet, status: "DRAFT" }));
         })
         .catch(console.error);
     }, 1000),
@@ -130,6 +148,7 @@ export default function CodeEditor() {
       prop: Prop
     ) =>
     (value?: Value) => {
+      setMessage(undefined);
       setSnippet((snippet) => {
         const newData = {
           ...snippet,
@@ -141,9 +160,14 @@ export default function CodeEditor() {
       });
     };
 
+  const isDraftSaved = state === "ready" && snippet.status === "DRAFT" && id;
+
   return (
     <main className="flex flex-col gap-4 p-2">
-      <h1>{id ? "Update" : "Create"} snippet</h1>
+      <h1 className="flex gap-3">
+        {id ? "Update" : "Create"} snippet
+        {isDraftSaved && <Tag tag={{ id: "DRAFT", name: "DRAFT" }} />}
+      </h1>
       <form action="post" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
@@ -162,11 +186,11 @@ export default function CodeEditor() {
           <div className="py-2">
             <Tags tags={tags} />
           </div>
-          <div className="h-80 rounded-md bg-[#1e1e1e] p-3">
+          <div className="h-72 rounded-md bg-[#1e1e1e] p-3">
             <Editor onChange={handleChange("code")} code={snippet.code} />
           </div>
           <div className="flex flex-row items-center justify-end gap-4">
-            {state === "ready" && snippet.status === "DRAFT" && id && (
+            {isDraftSaved && (
               <div className="italic text-zinc-500" aria-live="assertive">
                 Draft saved
               </div>
@@ -182,6 +206,11 @@ export default function CodeEditor() {
             <Button loading={state === "busy"} type="submit">
               Publish
             </Button>
+          </div>
+          <div className="h-14">
+            {message && (
+              <Alert variant={message.variant}>{message.content}</Alert>
+            )}
           </div>
         </div>
       </form>

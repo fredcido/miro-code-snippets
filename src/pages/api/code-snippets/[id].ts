@@ -19,8 +19,8 @@ export default async function handler(
         return res.json(item);
       }
       case "DELETE": {
-        const item = await codeSnippetsService.delete(id);
-        return res.json(item);
+        await codeSnippetsService.delete(id);
+        return res.json({});
       }
       default:
         return res.status(405).json({ message: "Method Not Allowed" });
