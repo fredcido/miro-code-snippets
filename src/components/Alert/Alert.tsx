@@ -6,6 +6,11 @@ import {
 import classNames from "classnames";
 import React from "react";
 
+export type Message = {
+  variant: AlertVariant;
+  content: string;
+};
+
 export type AlertVariant = "info" | "danger" | "success" | "warning" | "idle";
 
 type Props = {

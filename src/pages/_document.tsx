@@ -6,7 +6,7 @@ export default function Document() {
     <Html>
       <Head>
         <meta name="description" content="App powering Miro Code Snippets" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" />
       </Head>
       <body>
         <Main />

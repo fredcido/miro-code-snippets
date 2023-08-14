@@ -12,20 +12,15 @@ import {
   codeSnippetsService,
 } from "~/business";
 import { run } from "~/sandbox";
-import { Tag, TagType, Tags } from "~/components/Tags";
+import { Tag, type TagType, Tags } from "~/components/Tags";
 import { IconSelector } from "~/components/IconSelector";
 import { debounce } from "lodash";
 import { getRegistry } from "~/business/actions";
 import { typeToCleanName } from "~/business/utils";
-import { Alert, type AlertVariant } from "~/components/Alert";
+import { Alert, type Message } from "~/components/Alert";
 
 const initialCode = `// Write your code here
 miro.board.notifications.showInfo("Hey there from my Snippet!")`;
-
-type Message = {
-  variant: AlertVariant;
-  content: string;
-};
 
 export default function CodeEditor() {
   const searchParams = useSearchParams();

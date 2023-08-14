@@ -6,19 +6,22 @@ import { codeSnippetsService } from "~/business/services/CodeSnippets";
 import { Input } from "~/components/Input";
 import { debounce } from "lodash";
 import { getRegistry } from "~/business/actions";
-import { Alert } from "~/components/Alert";
+import { Alert, type Message } from "~/components/Alert";
 import { IconButton, IconPlus } from "@mirohq/design-system";
+import { ListSnippetsSkeleton } from "~/components/Skeleton/ListSnippetsSkeleton";
 
 export default function CodeEditor() {
   const [items, setItems] = useState<CodeSnippet[]>([]);
+  const [state, setState] = useState<"idle" | "busy" | "ready">("idle");
+  const [message, setMessage] = useState<Message | undefined>();
   const [filter, setFilter] = useState("");
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    const newSnippet = async (snippet: CodeSnippet) => {
-      setItems((items) => [snippet, ...items]);
-    };
+  // eslint-disable-next-line @typescript-eslint/require-await
+  const newSnippet = async (snippet: CodeSnippet) => {
+    setItems((items) => [snippet, ...items]);
+  };
 
+  useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/require-await
     const snippetUpdated = async (snippet: CodeSnippet) => {
       setItems((items) => {
@@ -35,7 +38,19 @@ export default function CodeEditor() {
     getRegistry().on("snippet:created", newSnippet);
     getRegistry().on("snippet:updated", snippetUpdated);
 
-    codeSnippetsService.getMine().then(setItems).catch(console.error);
+    codeSnippetsService
+      .getMine()
+      .then((items) => {
+        setItems(items);
+        setState("ready");
+      })
+      .catch((error) => {
+        console.error(error);
+        setMessage({
+          content: "Error fetching code snippets.",
+          variant: "danger",
+        });
+      });
 
     return () => {
       getRegistry().off("snippet:created", newSnippet);
@@ -57,7 +72,13 @@ export default function CodeEditor() {
         url: `/code-editor/?id=${code.id}`,
         width: 800,
       })
-      .catch(console.error);
+      .catch((error) => {
+        console.error(error);
+        setMessage({
+          content: "Error editing code snippet.",
+          variant: "danger",
+        });
+      });
   };
 
   const handleAdd = () => {
@@ -66,7 +87,13 @@ export default function CodeEditor() {
         url: `/code-editor`,
         width: 800,
       })
-      .catch(console.error);
+      .catch((error) => {
+        console.error(error);
+        setMessage({
+          content: "Error adding code snippet.",
+          variant: "danger",
+        });
+      });
   };
 
   const handleRemove = (code: CodeSnippet) => {
@@ -79,7 +106,13 @@ export default function CodeEditor() {
       .then(() => {
         setItems((items) => items.filter((item) => item.id !== code.id));
       })
-      .catch(console.error);
+      .catch((error) => {
+        console.error(error);
+        setMessage({
+          content: "Error removing code snippet.",
+          variant: "danger",
+        });
+      });
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
@@ -90,7 +123,7 @@ export default function CodeEditor() {
     setFilter(e.target.value);
   }, 200);
 
-  return (
+  return state === "ready" ? (
     <section className="px-6 py-1">
       <Input
         placeholder="Search..."
@@ -102,6 +135,8 @@ export default function CodeEditor() {
         autoFocus
       />
       <main className="flex max-h-[32em] flex-col gap-4 overflow-auto py-2">
+        {message && <Alert variant={message.variant}>{message.content}</Alert>}
+
         {filteredItems.length < 1 && (
           <div className="py-6">
             <Alert variant="idle">No code snippets available.</Alert>
@@ -127,5 +162,7 @@ export default function CodeEditor() {
         </IconButton>
       </footer>
     </section>
+  ) : (
+    <ListSnippetsSkeleton />
   );
 }
