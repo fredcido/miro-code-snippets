@@ -44,7 +44,10 @@ export function CodePreview({
     <section className="rounded-md bg-slate-50 p-3">
       <h2 className="flex items-center gap-2">
         <Icon icon={codeSnippet.icon ?? "cog"} />
-        <span title={codeSnippet.name} className="truncate text-lg">
+        <span
+          title={codeSnippet.name}
+          className="truncate text-lg font-semibold"
+        >
           <Tooltip>
             <Tooltip.Trigger>{codeSnippet.name}</Tooltip.Trigger>
             <Tooltip.Content>

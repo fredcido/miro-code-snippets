@@ -11,7 +11,7 @@ let runtime: Sandbox;
 
 export const run = async (code: string) => {
   if (!runtime) {
-    runtime = new Ses();
+    runtime = new Ses(window.miro);
   }
 
   return runtime.execute(code);

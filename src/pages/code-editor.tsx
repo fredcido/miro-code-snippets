@@ -39,6 +39,7 @@ export default function CodeEditor() {
 
   useEffect(() => {
     if (!id) {
+      setState("ready");
       return;
     }
 
