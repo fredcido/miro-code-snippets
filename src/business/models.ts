@@ -37,15 +37,16 @@ const VisibilitySchema = z.union([
   z.literal("PUBLIC"),
 ]);
 
+const StatusSchema = z.union([z.literal("DRAFT"), z.literal("PUBLISHED")]);
+const OwnershipSchema = z.union([z.literal("USER"), z.literal("OTHER")]);
+
 export const CreateCodeSnippetSchema = z
   .object({
     name: z.string(),
     code: z.string(),
     icon: z.string().optional(),
-    status: z.union([z.literal("DRAFT"), z.literal("PUBLISHED")]),
-    visibility: VisibilitySchema.default("PRIVATE").optional(),
+    status: StatusSchema,
     predicate: PredicateSchema.default({}).optional(),
-    shareConfig: z.array(ShareConfigSchema).default([]).optional(),
   })
   .strict();
 
@@ -53,6 +54,9 @@ export const CodeSnippetSchema = CreateCodeSnippetSchema.extend({
   id: z.string(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+  shareConfig: z.array(ShareConfigSchema).default([]),
+  owner: OwnershipSchema.default("OTHER"),
+  visibility: VisibilitySchema.default("PRIVATE"),
 });
 
 export type CreateCodeSnippet = z.infer<typeof CreateCodeSnippetSchema>;

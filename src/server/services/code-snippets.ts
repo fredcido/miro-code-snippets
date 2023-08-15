@@ -1,4 +1,4 @@
-import { type Prisma } from "@prisma/client";
+import { type PrismaClient, type Prisma } from "@prisma/client";
 
 import type {
   CodeSnippet,
@@ -10,6 +10,7 @@ import { env } from "~/env.mjs";
 import { pick } from "lodash";
 
 const includeSelect = {
+  createdBy: true,
   ShareConfig: {
     select: {
       id: true,
@@ -28,31 +29,42 @@ type SnippetWithRelations = Prisma.SnippetGetPayload<{
   include: typeof includeSelect;
 }>;
 
-const snippetToCodeSnippet = <DataSnippet extends SnippetWithRelations>(
-  snippet: DataSnippet
-): CodeSnippet => ({
-  id: snippet.id,
-  code: snippet.code,
-  name: snippet.name,
-  createdAt: snippet.createdAt.toDateString(),
-  updatedAt: snippet.updatedAt.toDateString(),
-  status: snippet.status,
-  visibility: snippet.visibility,
-  icon: snippet.icon,
-  // @ts-expect-error JSON field not properly converted
-  predicate: snippet.Predicate.at(0)?.predicate ?? {},
-  shareConfig: snippet.ShareConfig.map((share) => ({
-    identifier: share.identifier,
-    sourceType: share.sourceType,
-  })),
-});
+export class CodeSnippetService {
+  userInfo?: UserInfo;
 
-export const codeSnippetsService = {
-  create: async (
+  constructor(private prisma: PrismaClient) {}
+
+  setUserInfo(userInfo: UserInfo): void {
+    this.userInfo = userInfo;
+  }
+  private snippetToCodeSnippet<DataSnippet extends SnippetWithRelations>(
+    snippet: DataSnippet,
+    userInfo?: UserInfo
+  ): CodeSnippet {
+    return {
+      id: snippet.id,
+      code: snippet.code,
+      name: snippet.name,
+      createdAt: snippet.createdAt.toDateString(),
+      updatedAt: snippet.updatedAt.toDateString(),
+      status: snippet.status,
+      visibility: snippet.visibility,
+      icon: snippet.icon,
+      // @ts-expect-error JSON field not properly converted
+      predicate: snippet.Predicate.at(0)?.predicate ?? {},
+      shareConfig: snippet.ShareConfig.map((share) => ({
+        identifier: share.identifier,
+        sourceType: share.sourceType,
+      })),
+      owner: snippet.createdBy.userId === userInfo?.user ? "USER" : "OTHER",
+    };
+  }
+
+  async create(
     data: CreateCodeSnippet,
     userInfo: UserInfo,
     boardId: string
-  ): Promise<CodeSnippet> => {
+  ): Promise<CodeSnippet> {
     const { predicate, ...rest } = data;
     const sourceData = {
       boardId: boardId,
@@ -60,7 +72,7 @@ export const codeSnippetsService = {
       teamId: userInfo.team,
     };
 
-    const snippet = await prisma.snippet.create({
+    const snippet = await this.prisma.snippet.create({
       data: {
         ...rest,
         icon: data.icon ?? "",
@@ -97,12 +109,15 @@ export const codeSnippetsService = {
           ],
         },
       },
-      include: includeSelect,
     });
 
-    return snippetToCodeSnippet(snippet as SnippetWithRelations);
-  },
-  update: async (data: CodeSnippet): Promise<CodeSnippet> => {
+    return this.snippetToCodeSnippet(
+      snippet as SnippetWithRelations,
+      this.userInfo
+    );
+  }
+
+  async update(data: CodeSnippet): Promise<CodeSnippet> {
     const cleanData = pick(data, [
       "code",
       "name",
@@ -110,7 +125,7 @@ export const codeSnippetsService = {
       "visibility",
       "icon",
     ]);
-    const snippet = await prisma.snippet.update({
+    const snippet = await this.prisma.snippet.update({
       data: cleanData,
       include: includeSelect,
       where: {
@@ -118,10 +133,11 @@ export const codeSnippetsService = {
       },
     });
 
-    return snippetToCodeSnippet(snippet);
-  },
-  getMine: async (userInfo: UserInfo): Promise<CodeSnippet[]> => {
-    const items = await prisma.snippet.findMany({
+    return this.snippetToCodeSnippet(snippet, this.userInfo);
+  }
+
+  async getMine(userInfo: UserInfo): Promise<CodeSnippet[]> {
+    const items = await this.prisma.snippet.findMany({
       include: includeSelect,
       where: {
         OR: [
@@ -138,20 +154,39 @@ export const codeSnippetsService = {
       },
     });
 
-    return items.map((snippet) => snippetToCodeSnippet(snippet));
-  },
-  getAll: async (): Promise<CodeSnippet[]> => {
-    const items = await prisma.snippet.findMany({
+    return items.map((snippet) =>
+      this.snippetToCodeSnippet(snippet, this.userInfo)
+    );
+  }
+
+  async getPublic(): Promise<CodeSnippet[]> {
+    const items = await this.prisma.snippet.findMany({
+      include: includeSelect,
+      where: {
+        visibility: "PUBLIC",
+      },
+    });
+
+    return items.map((snippet) =>
+      this.snippetToCodeSnippet(snippet, this.userInfo)
+    );
+  }
+
+  async getAll(): Promise<CodeSnippet[]> {
+    const items = await this.prisma.snippet.findMany({
       include: includeSelect,
     });
 
-    return items.map((snippet) => snippetToCodeSnippet(snippet));
-  },
-  getActions: async (
+    return items.map((snippet) =>
+      this.snippetToCodeSnippet(snippet, this.userInfo)
+    );
+  }
+
+  async getActions(
     userInfo: UserInfo,
     boardId: string
-  ): Promise<CodeSnippet[]> => {
-    const items = await prisma.snippet.findMany({
+  ): Promise<CodeSnippet[]> {
+    const items = await this.prisma.snippet.findMany({
       include: includeSelect,
       where: {
         status: "PUBLISHED",
@@ -195,23 +230,29 @@ export const codeSnippetsService = {
       take: env.MAX_ACTIONS,
     });
 
-    return items.map((snippet) => snippetToCodeSnippet(snippet));
-  },
-  getById: async (id: CodeSnippet["id"]): Promise<CodeSnippet> => {
-    const snippet = await prisma.snippet.findUniqueOrThrow({
+    return items.map((snippet) =>
+      this.snippetToCodeSnippet(snippet, this.userInfo)
+    );
+  }
+
+  async getById(id: CodeSnippet["id"]): Promise<CodeSnippet> {
+    const snippet = await this.prisma.snippet.findUniqueOrThrow({
       include: includeSelect,
       where: {
         id,
       },
     });
 
-    return snippetToCodeSnippet(snippet);
-  },
-  delete: async (id: CodeSnippet["id"]): Promise<void> => {
-    await prisma.snippet.delete({
+    return this.snippetToCodeSnippet(snippet, this.userInfo);
+  }
+
+  async delete(id: CodeSnippet["id"]): Promise<void> {
+    await this.prisma.snippet.delete({
       where: {
         id,
       },
     });
-  },
-};
+  }
+}
+
+export const codeSnippetsService = new CodeSnippetService(prisma);

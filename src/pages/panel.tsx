@@ -7,7 +7,7 @@ import { Input } from "~/components/Input";
 import { debounce } from "lodash";
 import { getRegistry } from "~/business/actions";
 import { Alert, type Message } from "~/components/Alert";
-import { IconButton, IconPlus, Tooltip } from "@mirohq/design-system";
+import { IconButton, IconPlus } from "@mirohq/design-system";
 import { ListSnippetsSkeleton } from "~/components/Skeleton/ListSnippetsSkeleton";
 
 export default function CodeEditor() {
