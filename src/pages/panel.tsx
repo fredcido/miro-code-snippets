@@ -7,7 +7,7 @@ import { Input } from "~/components/Input";
 import { debounce } from "lodash";
 import { getRegistry } from "~/business/actions";
 import { Alert, type Message } from "~/components/Alert";
-import { IconButton, IconPlus } from "@mirohq/design-system";
+import { IconButton, IconPlus, Tooltip } from "@mirohq/design-system";
 import { ListSnippetsSkeleton } from "~/components/Skeleton/ListSnippetsSkeleton";
 
 export default function CodeEditor() {
@@ -124,17 +124,18 @@ export default function CodeEditor() {
   }, 200);
 
   return state === "ready" ? (
-    <section className="px-6 py-1">
+    <section className="flex h-screen flex-col gap-2 px-6 py-1">
       <Input
         placeholder="Search..."
         name="icon"
         autoComplete="off"
         type="search"
+        className="flex-shrink-0"
         onKeyDown={(e) => e.stopPropagation()}
         onChange={handleFilter}
         autoFocus
       />
-      <main className="flex max-h-[32em] flex-col gap-4 overflow-auto py-2">
+      <main className="flex flex-grow flex-col gap-4 overflow-auto py-2">
         {message && <Alert variant={message.variant}>{message.content}</Alert>}
 
         {filteredItems.length < 1 && (
@@ -152,7 +153,24 @@ export default function CodeEditor() {
           />
         ))}
       </main>
-      <footer className="flex justify-end py-2">
+      <footer className="flex items-center justify-between py-4">
+        <a
+          href="https://github.com/fredcido/miro-code-snippets/issues"
+          target="_blank"
+          className="flex flex-col items-center"
+        >
+          <span className="m2 icon icon-help-question"></span>
+          Learn more
+        </a>
+        <a
+          href="https://forms.gle/7vre8fvUKDfc5x3A7"
+          target="_blank"
+          className="flex flex-col items-center"
+          title="Direct contact to provide feedback"
+        >
+          <span className="m2 icon icon-comment-feedback"></span>
+          Send Feedback
+        </a>
         <IconButton
           variant="solid-prominent"
           label="Add Snippet"

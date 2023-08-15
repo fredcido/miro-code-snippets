@@ -4,11 +4,11 @@ type Props = React.HTMLProps<HTMLInputElement> & {
   label?: string;
 };
 
-export function Input({ label, id, ...rest }: Props) {
+export function Input({ label, id, className, ...rest }: Props) {
   return (
     <>
       {label && <label htmlFor={id}>{label}</label>}
-      <input className="input" id={id} {...rest} />
+      <input className={`input ${className}`} id={id} {...rest} />
     </>
   );
 }

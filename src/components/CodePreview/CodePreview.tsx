@@ -42,9 +42,9 @@ export function CodePreview({
 
   return (
     <section className="rounded-md bg-slate-50 p-3">
-      <h2 className="flex items-center gap-2 text-lg">
+      <h2 className="flex items-center gap-2">
         <Icon icon={codeSnippet.icon ?? "cog"} />
-        <span title={codeSnippet.name} className="truncate">
+        <span title={codeSnippet.name} className="truncate text-lg">
           <Tooltip>
             <Tooltip.Trigger>{codeSnippet.name}</Tooltip.Trigger>
             <Tooltip.Content>
@@ -93,7 +93,9 @@ export function CodePreview({
           </DropdownMenu>
         </div>
       </h2>
-      <Tags tags={tags} />
+      <div className="text-sm">
+        <Tags tags={tags} />
+      </div>
     </section>
   );
 }
