@@ -8,6 +8,7 @@ export const handleIconClick = () => {
   miro.board.ui
     .openPanel({
       url: "/panel",
+      height: 600,
     })
     .catch(console.error);
 };

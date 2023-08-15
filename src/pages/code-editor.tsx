@@ -153,8 +153,10 @@ export default function CodeEditor() {
 
   const saveDraft = useCallback(
     debounce((data: CreateCodeSnippet) => {
-      if (data.name.trim().length <= 2) return;
-      if (data.code.trim().length < 5) return;
+      if (data.name.trim().length <= 5) return;
+      if (data.code.trim().length < 10) return;
+
+      if (data.status !== "DRAFT") return;
 
       saveSnippet({ ...data, status: "DRAFT" })
         .then((snippet) => {
