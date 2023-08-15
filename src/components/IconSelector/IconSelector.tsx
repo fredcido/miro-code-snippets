@@ -4,24 +4,26 @@ import { debounce } from "lodash";
 import iconsNames from "@mirohq/design-system-icons/svg/meta.json";
 import { Input } from "~/components/Input";
 import { Icon } from "../Icon";
+import { supported } from "./icons";
 
 type Props = {
   icon?: string;
+  list?: string[];
   onSelect: (icon: string) => void;
 };
 
-export function IconSelector({
-  onSelect,
-  icon = "triangle-square-circle",
-}: Props) {
+export function IconSelector({ onSelect, icon = "plug", list = supported }: Props) {
   const [filter, setFilter] = useState("");
 
-  const icons = useMemo(() => {
-    const iconNames = Object.keys(iconsNames);
-    if (!filter.trim().length) return iconNames;
+  const available = Object.keys(iconsNames).filter((icon) =>
+    list.includes(icon)
+  );
 
-    return iconNames.filter((icon) => icon.includes(filter));
-  }, [filter]);
+  const icons = useMemo(() => {
+    if (!filter.trim().length) return available;
+
+    return available.filter((icon) => icon.includes(filter));
+  }, [filter, available]);
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const handleFilter = debounce((e: React.ChangeEvent<HTMLInputElement>) => {

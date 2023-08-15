@@ -16,7 +16,7 @@ type Props = {
 export function Editor({ code, onChange }: Props) {
   const beforeMount: BeforeMount = (monaco: Monaco) => {
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      noLib: true,
+      // noLib: true,
       allowNonTsExtensions: true,
     });
 

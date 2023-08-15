@@ -38,8 +38,7 @@ export default function CodeEditor() {
   const [state, setState] = useState<"idle" | "busy" | "ready">("idle");
 
   useEffect(() => {
-    if (!id || state !== "idle") {
-      setState("ready");
+    if (!id) {
       return;
     }
 
@@ -65,10 +64,12 @@ export default function CodeEditor() {
     };
 
     loadCodeSnippet();
-  }, [id, state, setState]);
+  }, [id]);
 
   const urlTypes = searchParams.getAll("type");
   useEffect(() => {
+    if (id) return;
+
     const tags = urlTypes.map((type) => ({
       id: type,
       name: typeToCleanName(type),
@@ -76,7 +77,7 @@ export default function CodeEditor() {
     })) as TagType[];
 
     setTags(tags);
-  }, [urlTypes]);
+  }, [urlTypes, id]);
 
   const saveSnippet = useCallback(
     async (data: CreateCodeSnippet) => {
@@ -149,7 +150,7 @@ export default function CodeEditor() {
       });
   };
 
-  const saveDebounced = useCallback(
+  const saveDraft = useCallback(
     debounce((data: CreateCodeSnippet) => {
       if (data.name.trim().length <= 2) return;
       if (data.code.trim().length < 5) return;
@@ -176,14 +177,14 @@ export default function CodeEditor() {
           [prop]: value,
         };
 
-        saveDebounced(newData);
+        saveDraft(newData);
         return newData;
       });
     };
 
   const isDraftSaved = state === "ready" && snippet.status === "DRAFT" && id;
 
-  return state == "idle" ? (
+  return state === "idle" ? (
     <SnippetFormSkeleton />
   ) : (
     <main className="flex flex-col gap-4 p-2">
@@ -192,7 +193,7 @@ export default function CodeEditor() {
         {isDraftSaved && <Tag tag={{ id: "DRAFT", name: "DRAFT" }} />}
       </h1>
       <form action="post" onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <div className="flex gap-2">
             <IconSelector onSelect={handleChange("icon")} icon={snippet.icon} />
 
@@ -206,9 +207,12 @@ export default function CodeEditor() {
               autoFocus
             />
           </div>
-          <div className="py-2">
-            <Tags tags={tags} />
-          </div>
+          {tags.length > 0 && <Tags tags={tags} />}
+          {message && (
+            <Alert variant={message.variant}>
+              <div className="font-bold">{message.content}</div>
+            </Alert>
+          )}
           <div className="h-72 rounded-md bg-[#1e1e1e] p-3">
             <Editor onChange={handleChange("code")} code={snippet.code} />
           </div>
@@ -229,13 +233,6 @@ export default function CodeEditor() {
             <Button loading={state === "busy"} type="submit">
               Publish
             </Button>
-          </div>
-          <div className="h-14">
-            {message && (
-              <Alert variant={message.variant}>
-                <div className="font-bold">{message.content}</div>
-              </Alert>
-            )}
           </div>
         </div>
       </form>

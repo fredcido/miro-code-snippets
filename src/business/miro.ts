@@ -53,9 +53,11 @@ const registerSnippetAsAction = async (snippet: CodeSnippet) => {
 };
 
 const runCode = (snippet: CodeSnippet) => () => {
-  void miro.board.notifications.showInfo(`Triggered ${snippet.name}`);
   run(snippet.code).catch((error) => {
-    void miro.board.notifications.showError(`Error: ${error}`);
+    console.error(error);
+    void miro.board.notifications.showError(
+      `Error executing: ${snippet.name}. Check your browser dev console.`
+    );
   });
 };
 
@@ -74,6 +76,7 @@ export const registerCustomActions = async () => {
         label: "Create snippet",
         icon: "lightning",
         description: "Create code snippets directly on the board",
+        position: 0,
       },
       predicate: {
         $or: [
@@ -121,6 +124,7 @@ export const init = async () => {
     return () => {
       miro.board.ui.off("icon:click", handleIconClick);
       getRegistry().off("snippet:created", registerSnippetAsAction);
+      getRegistry().off("snippet:updated", registerSnippetAsAction);
       unsuscribeActions();
     };
   } catch (error) {
