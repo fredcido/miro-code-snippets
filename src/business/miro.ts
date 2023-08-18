@@ -1,8 +1,8 @@
 import type { CustomAction, CustomEvent } from "@mirohq/websdk-types";
 import { type CodeSnippet, codeSnippetsService } from ".";
 import slug from "slug";
-import { run } from "~/sandbox";
 import { getRegistry } from "./actions";
+import { runCode } from "./utils";
 
 export const handleIconClick = () => {
   miro.board.ui
@@ -49,22 +49,13 @@ const registerSnippetAsAction = async (snippet: CodeSnippet) => {
       },
       predicate: snippet.predicate,
     },
-    runCode(snippet)
+    () => void runCode(snippet)
   ).catch(console.error);
-};
-
-const runCode = (snippet: CodeSnippet) => () => {
-  run(snippet.code).catch((error) => {
-    console.error(error);
-    void miro.board.notifications.showError(
-      `Error executing: ${snippet.name}. Check your browser dev console.`
-    );
-  });
 };
 
 export const registerCustomActions = async () => {
   try {
-    const actions = await codeSnippetsService.getActions();
+    const actions = await codeSnippetsService.listActions();
     actions.map(registerSnippetAsAction);
   } catch (error) {
     console.error(error);

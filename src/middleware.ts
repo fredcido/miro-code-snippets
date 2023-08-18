@@ -13,9 +13,12 @@ export default async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (error) {
-    console.log({ error });
+    let message = "Unauthorized";
+    if (error instanceof Error && error.message) {
+      message = error.message;
+    } 
     return new NextResponse(
-      JSON.stringify({ success: false, message: "authentication failed" }),
+      JSON.stringify({ success: false, message: message }),
       { status: 401, headers: { "content-type": "application/json" } }
     );
   }

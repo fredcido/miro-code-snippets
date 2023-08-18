@@ -30,16 +30,11 @@ type SnippetWithRelations = Prisma.SnippetGetPayload<{
 }>;
 
 export class CodeSnippetService {
-  userInfo?: UserInfo;
-
   constructor(private prisma: PrismaClient) {}
 
-  setUserInfo(userInfo: UserInfo): void {
-    this.userInfo = userInfo;
-  }
   private snippetToCodeSnippet<DataSnippet extends SnippetWithRelations>(
     snippet: DataSnippet,
-    userInfo?: UserInfo
+    userInfo: UserInfo
   ): CodeSnippet {
     return {
       id: snippet.id,
@@ -111,13 +106,10 @@ export class CodeSnippetService {
       },
     });
 
-    return this.snippetToCodeSnippet(
-      snippet as SnippetWithRelations,
-      this.userInfo
-    );
+    return this.snippetToCodeSnippet(snippet as SnippetWithRelations, userInfo);
   }
 
-  async update(data: CodeSnippet): Promise<CodeSnippet> {
+  async update(data: CodeSnippet, userInfo: UserInfo): Promise<CodeSnippet> {
     const cleanData = pick(data, [
       "code",
       "name",
@@ -133,7 +125,7 @@ export class CodeSnippetService {
       },
     });
 
-    return this.snippetToCodeSnippet(snippet, this.userInfo);
+    return this.snippetToCodeSnippet(snippet, userInfo);
   }
 
   async getMine(userInfo: UserInfo): Promise<CodeSnippet[]> {
@@ -154,32 +146,27 @@ export class CodeSnippetService {
       },
     });
 
-    return items.map((snippet) =>
-      this.snippetToCodeSnippet(snippet, this.userInfo)
-    );
+    return items.map((snippet) => this.snippetToCodeSnippet(snippet, userInfo));
   }
 
-  async getPublic(): Promise<CodeSnippet[]> {
+  async getPublic(userInfo: UserInfo): Promise<CodeSnippet[]> {
     const items = await this.prisma.snippet.findMany({
       include: includeSelect,
       where: {
         visibility: "PUBLIC",
+        status: "PUBLISHED",
       },
     });
 
-    return items.map((snippet) =>
-      this.snippetToCodeSnippet(snippet, this.userInfo)
-    );
+    return items.map((snippet) => this.snippetToCodeSnippet(snippet, userInfo));
   }
 
-  async getAll(): Promise<CodeSnippet[]> {
+  async getAll(userInfo: UserInfo): Promise<CodeSnippet[]> {
     const items = await this.prisma.snippet.findMany({
       include: includeSelect,
     });
 
-    return items.map((snippet) =>
-      this.snippetToCodeSnippet(snippet, this.userInfo)
-    );
+    return items.map((snippet) => this.snippetToCodeSnippet(snippet, userInfo));
   }
 
   async getActions(
@@ -230,12 +217,13 @@ export class CodeSnippetService {
       take: env.MAX_ACTIONS,
     });
 
-    return items.map((snippet) =>
-      this.snippetToCodeSnippet(snippet, this.userInfo)
-    );
+    return items.map((snippet) => this.snippetToCodeSnippet(snippet, userInfo));
   }
 
-  async getById(id: CodeSnippet["id"]): Promise<CodeSnippet> {
+  async getById(
+    id: CodeSnippet["id"],
+    userInfo: UserInfo
+  ): Promise<CodeSnippet> {
     const snippet = await this.prisma.snippet.findUniqueOrThrow({
       include: includeSelect,
       where: {
@@ -243,7 +231,7 @@ export class CodeSnippetService {
       },
     });
 
-    return this.snippetToCodeSnippet(snippet, this.userInfo);
+    return this.snippetToCodeSnippet(snippet, userInfo);
   }
 
   async delete(id: CodeSnippet["id"]): Promise<void> {

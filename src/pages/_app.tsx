@@ -4,14 +4,14 @@ import "~/styles/globals.css";
 import "mirotone/dist/styles.css";
 import { MiroContextWrapper } from "~/components/MiroContext";
 import { SnippetFormSkeleton } from "~/components/Skeleton/SnippetFormSkeleton";
-import { ListSnippetsSkeleton } from "~/components/Skeleton/ListSnippetsSkeleton";
+import { PanelSkeleton } from "~/components/Skeleton/PanelSkeleton";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   const { pathname } = useRouter();
   const fallback = pathname.includes("code-editor") ? (
     <SnippetFormSkeleton />
   ) : (
-    <ListSnippetsSkeleton />
+    <PanelSkeleton />
   );
   return (
     <MiroContextWrapper fallback={fallback}>

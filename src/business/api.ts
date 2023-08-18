@@ -31,38 +31,52 @@ const request = async <Response, Data = unknown>(
   return responseData;
 };
 
-export const api = {
-  setJWT: (j: string) => {
+export class Api<Entity extends object> {
+  setJWT(j: string) {
     jwt = j;
-  },
-  addHeader: (key: string, value: string) => {
+  }
+
+  addHeader(key: string, value: string) {
     headers.set(key, value);
-  },
-  get: async <LocalResponse>(
+  }
+
+  async get<Response extends Entity | Entity[]>(
     url: string,
     config?: RequestInit
-  ): Promise<LocalResponse> => request<LocalResponse>(url, config),
-  post: async <Payload, LocalResponse = Response>(
-    url: string,
-    data: Payload,
-    config?: RequestInit
-  ): Promise<LocalResponse> =>
-    request<LocalResponse>(url, { method: "POST", data, ...config }),
-  patch: async <Payload, LocalResponse = Response>(
+  ): Promise<Response> {
+    return request<Response>(url, config);
+  }
+
+  async post<Payload, Response extends Entity>(
     url: string,
     data: Payload,
     config?: RequestInit
-  ): Promise<LocalResponse> =>
-    request<LocalResponse>(url, { method: "PATCH", data, ...config }),
-  put: async <Payload, LocalResponse = Response>(
+  ): Promise<Response> {
+    return request<Response>(url, { method: "POST", data, ...config });
+  }
+
+  async patch<Payload extends Partial<Entity>, Response extends Entity>(
     url: string,
     data: Payload,
     config?: RequestInit
-  ): Promise<LocalResponse> =>
-    request<LocalResponse>(url, { method: "PUT", data, ...config }),
-  delete: async <LocalResponse>(
+  ): Promise<Response> {
+    return request<Response>(url, { method: "PATCH", data, ...config });
+  }
+
+  async put<Payload, Response extends Entity>(
+    url: string,
+    data: Payload,
+    config?: RequestInit
+  ): Promise<Response> {
+    return request<Response>(url, { method: "PUT", data, ...config });
+  }
+
+  async delete<Response extends Entity>(
     url: string,
     config?: RequestInit
-  ): Promise<LocalResponse> =>
-    request<LocalResponse>(url, { method: "DELETE", ...config }),
-};
+  ): Promise<void> {
+    await request<Response>(url, { method: "DELETE", ...config });
+  }
+}
+
+export const api = new Api();

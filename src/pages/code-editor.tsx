@@ -32,7 +32,6 @@ export default function CodeEditor() {
     code: initialCode,
     name: "",
     status: "DRAFT",
-    visibility: "PRIVATE",
     icon: "triangle-square-circle",
   });
   const [state, setState] = useState<"idle" | "busy" | "ready">("idle");
@@ -98,12 +97,15 @@ export default function CodeEditor() {
             setState("ready");
           });
       } else {
+        const predicate = urlTypes.length
+          ? {
+              $or: urlTypes.map((type) => ({ type })),
+            }
+          : {};
         return codeSnippetsService
           .create({
             ...data,
-            predicate: {
-              $or: urlTypes.map((type) => ({ type })),
-            },
+            predicate,
           })
           .then((latest) => {
             getRegistry().broadcast("snippet:created", latest);

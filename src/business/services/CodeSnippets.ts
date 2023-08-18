@@ -1,23 +1,53 @@
-import { api } from "../api";
+import { api, type Api } from "../api";
 import type { CodeSnippet, CreateCodeSnippet } from "../models";
 
 const ENDPOINT = "/code-snippets";
 
-export const codeSnippetsService = {
-  create: async <Payload extends CreateCodeSnippet, Output extends CodeSnippet>(
-    snippet: Payload
-  ): Promise<Output> => api.post<Payload, Output>(ENDPOINT, snippet),
-  update: async <Output extends CodeSnippet, Payload extends CodeSnippet>(
-    snippet: Payload
-  ): Promise<Output> =>
-    api.patch<Payload, Output>(`${ENDPOINT}/${snippet.id}`, snippet),
-  remove: async <Payload extends CodeSnippet>(
-    snippet: Payload
-  ): Promise<void> => api.delete(`${ENDPOINT}/${snippet.id}`),
-  getById: async (id: string): Promise<CodeSnippet> =>
-    api.get(`${ENDPOINT}/${id}`),
-  getAll: async (): Promise<CodeSnippet[]> => api.get(ENDPOINT),
-  getMine: async (): Promise<CodeSnippet[]> => api.get(`${ENDPOINT}/mine`),
-  getActions: async (): Promise<CodeSnippet[]> =>
-    api.get(`${ENDPOINT}/actions`),
-};
+export class CodeSnippetsService<
+  Entity extends CodeSnippet,
+  CreateEntity extends CreateCodeSnippet
+> {
+  private api: Api<Entity>;
+
+  constructor(api: Api<Entity>) {
+    this.api = api;
+  }
+
+  async create(snippet: CreateEntity): Promise<Entity> {
+    return this.api.post<CreateEntity, Entity>(ENDPOINT, snippet);
+  }
+
+  async update(snippet: Partial<Entity>): Promise<Entity> {
+    return this.api.patch(`${ENDPOINT}/${snippet.id}`, snippet);
+  }
+
+  async remove(snippet: Entity): Promise<void> {
+    await this.api.delete(`${ENDPOINT}/${snippet.id}`);
+  }
+
+  async getById(id: string): Promise<Entity> {
+    return this.api.get(`${ENDPOINT}/${id}`);
+  }
+
+  async listAll(): Promise<Entity[]> {
+    return this.api.get(ENDPOINT);
+  }
+
+  async listMine(): Promise<Entity[]> {
+    return this.api.get(`${ENDPOINT}/mine`);
+  }
+
+  async listPublic(): Promise<Entity[]> {
+    return this.api.get(`${ENDPOINT}/public`);
+  }
+
+  async listUsed(): Promise<Entity[]> {
+    return this.api.get(`${ENDPOINT}/user`);
+  }
+
+  async listActions(): Promise<Entity[]> {
+    return this.api.get(`${ENDPOINT}/actions`);
+  }
+}
+
+export const codeSnippetsService = new CodeSnippetsService(api);

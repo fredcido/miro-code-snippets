@@ -1,35 +1,38 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { type NextApiRequest, type NextApiResponse } from "next";
+import { createRouter } from "next-connect";
 import { CreateCodeSnippetSchema } from "~/business/models";
-import { extractUser } from "~/server/auth";
+import { extractUser, withAuth } from "~/server/auth";
+import { onError } from "~/server/middleware";
 import { codeSnippetsService } from "~/server/services/code-snippets";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  try {
-    switch (req.method) {
-      case "POST": {
-        const userInfo = await extractUser(req.headers.authorization);
-        const boardId = req.headers["x-board-id"] as string;
-        const newCodeSnippet = CreateCodeSnippetSchema.parse(req.body);
+const router = createRouter<NextApiRequest, NextApiResponse>();
 
-        const snippet = await codeSnippetsService.create(
-          newCodeSnippet,
-          userInfo,
-          boardId
-        );
+router
+  .use(withAuth)
+  .get(async (req, res) => {
+    const userInfo = await extractUser(req.headers.authorization);
+    const items = await codeSnippetsService.getAll(userInfo);
+    return res.json(items);
+  })
+  .post(async (req, res) => {
+    const boardId = req.headers["x-board-id"] as string;
+    const newCodeSnippet = CreateCodeSnippetSchema.parse(req.body);
+    const userInfo = await extractUser(req.headers.authorization);
 
-        return res.json(snippet);
-      }
-      case "GET": {
-        const items = await codeSnippetsService.getAll();
-        return res.json(items);
-      }
-      default:
-        return res.status(405).json({ message: "Method Not Allowed" });
-    }
-  } catch (error) {
-    return res.status(400).json({ error });
-  }
-}
+    const snippet = await codeSnippetsService.create(
+      newCodeSnippet,
+      userInfo,
+      boardId
+    );
+
+    return res.json(snippet);
+  })
+  .patch(async (req, res) => {
+    const id = req.query.id as string;
+    await codeSnippetsService.delete(id);
+    return res.json({});
+  });
+
+export default router.handler({
+  onError,
+});

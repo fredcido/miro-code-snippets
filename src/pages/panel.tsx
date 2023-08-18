@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useMemo, useState } from "react";
 import type { CodeSnippet } from "~/business/models";
 import { CodePreview } from "~/components/CodePreview";
@@ -9,10 +10,30 @@ import { getRegistry } from "~/business/actions";
 import { Alert, type Message } from "~/components/Alert";
 import { IconButton, IconPlus } from "@mirohq/design-system";
 import { ListSnippetsSkeleton } from "~/components/Skeleton/ListSnippetsSkeleton";
+import { runCode } from "~/business/utils";
+import { type TabType, Tabs } from "~/components/Tabs";
+
+const ownedTab = {
+  id: "owned",
+  name: "Owned",
+};
+
+const tabs: TabType[] = [
+  ownedTab,
+  {
+    id: "user",
+    name: "Used",
+  },
+  {
+    id: "public",
+    name: "Public",
+  },
+];
 
 export default function CodeEditor() {
   const [items, setItems] = useState<CodeSnippet[]>([]);
   const [state, setState] = useState<"idle" | "busy" | "ready">("idle");
+  const [tab, setTab] = useState<TabType>(ownedTab);
   const [message, setMessage] = useState<Message | undefined>();
   const [filter, setFilter] = useState("");
 
@@ -38,8 +59,28 @@ export default function CodeEditor() {
     getRegistry().on("snippet:created", newSnippet);
     getRegistry().on("snippet:updated", snippetUpdated);
 
-    codeSnippetsService
-      .getMine()
+    return () => {
+      getRegistry().off("snippet:created", newSnippet);
+      getRegistry().off("snippet:updated", snippetUpdated);
+    };
+  }, []);
+
+  useEffect(() => {
+    const load = () => {
+      setState("busy");
+
+      if (tab.id === "user") {
+        return codeSnippetsService.listMine();
+      }
+
+      if (tab.id === "public") {
+        return codeSnippetsService.listPublic();
+      }
+
+      return codeSnippetsService.listMine();
+    };
+
+    load()
       .then((items) => {
         setItems(items);
         setState("ready");
@@ -51,12 +92,7 @@ export default function CodeEditor() {
           variant: "danger",
         });
       });
-
-    return () => {
-      getRegistry().off("snippet:created", newSnippet);
-      getRegistry().off("snippet:updated", snippetUpdated);
-    };
-  }, []);
+  }, [tab.id]);
 
   const filteredItems = useMemo(() => {
     if (!filter.trim().length) return items;
@@ -123,7 +159,27 @@ export default function CodeEditor() {
     setFilter(e.target.value);
   }, 200);
 
-  return state === "ready" ? (
+  const ItemsContent = () => {
+    return (
+      <>
+        {filteredItems.length < 1 && (
+          <Alert variant="idle">No code snippets available.</Alert>
+        )}
+
+        {filteredItems.map((item) => (
+          <CodePreview
+            key={item.id}
+            codeSnippet={item}
+            onEdit={() => handleEdit(item)}
+            onRemove={() => handleRemove(item)}
+            onExecute={() => void runCode(item)}
+          />
+        ))}
+      </>
+    );
+  };
+
+  return (
     <section className="flex h-screen flex-col gap-2 px-6 py-1">
       <Input
         placeholder="Search..."
@@ -135,23 +191,13 @@ export default function CodeEditor() {
         onChange={handleFilter}
         autoFocus
       />
+
+      <Tabs tabs={tabs} onSelect={setTab} selected={tab} />
+
       <main className="flex flex-grow flex-col gap-4 overflow-auto py-2">
         {message && <Alert variant={message.variant}>{message.content}</Alert>}
 
-        {filteredItems.length < 1 && (
-          <div className="py-6">
-            <Alert variant="idle">No code snippets available.</Alert>
-          </div>
-        )}
-
-        {filteredItems.map((item) => (
-          <CodePreview
-            key={item.id}
-            codeSnippet={item}
-            onEdit={() => handleEdit(item)}
-            onRemove={() => handleRemove(item)}
-          />
-        ))}
+        {state === "busy" ? <ListSnippetsSkeleton /> : <ItemsContent />}
       </main>
       <footer className="flex items-center justify-between py-4">
         <a
@@ -180,7 +226,5 @@ export default function CodeEditor() {
         </IconButton>
       </footer>
     </section>
-  ) : (
-    <ListSnippetsSkeleton />
   );
 }

@@ -1,6 +1,8 @@
 import * as jose from "jose";
+import { type NextApiRequest, type NextApiResponse } from "next";
 import type { UserInfo } from "~/business/models";
 import { env } from "~/env.mjs";
+import { type NextHandler } from "next-connect/dist/types/types";
 
 export const extractUser = async (
   authHeader?: string | null
@@ -27,5 +29,19 @@ export const extractUser = async (
     } as UserInfo;
   } else {
     return nope();
+  }
+};
+
+export const withAuth = async (
+  req: NextApiRequest,
+  res: NextApiResponse,
+  next: NextHandler
+) => {
+  try {
+    await extractUser(req.headers.authorization);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return await next();
+  } catch (error) {
+    return res.status(401).json({ error });
   }
 };
