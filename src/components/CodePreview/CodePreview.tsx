@@ -13,7 +13,12 @@ import {
 import { type CodeSnippet } from "~/business";
 import { Icon } from "../Icon";
 import { Tags, type TagType } from "../Tags";
-import { hasCustomAction, predicateToTags } from "~/business/utils";
+import {
+  hasCustomAction,
+  predicateToTags,
+  usedByTheUser,
+} from "~/business/utils";
+import { useMiroContext } from "../MiroContext";
 
 type Callback = () => void;
 
@@ -35,6 +40,11 @@ export function CodePreview({
   onUse,
 }: Props) {
   const tags: TagType[] = [];
+  const miroContext = useMiroContext();
+
+  if (!miroContext) {
+    return null;
+  }
 
   if (codeSnippet.status === "DRAFT") {
     tags.push({
@@ -124,7 +134,7 @@ export function CodePreview({
       buttons.push(<ViewButton key="view-button" />);
     }
 
-    if (onUse) {
+    if (onUse && !usedByTheUser(codeSnippet, miroContext.userInfo.user)) {
       buttons.push(<UseButton key="use-button" />);
     }
   }

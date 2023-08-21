@@ -14,7 +14,7 @@ type Props = {
 
 type ContextStatus = "idle" | "loading" | "error" | "done";
 
-type MiroContextData = {
+export type MiroContextData = {
   boardInfo: BoardInfo;
   userInfo: UserInfo;
 };

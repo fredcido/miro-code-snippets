@@ -38,3 +38,12 @@ export const hasCustomAction = (snippet: CodeSnippet): boolean => {
     predicateToTags(snippet.predicate).length > 0
   );
 };
+
+export const usedByTheUser = (
+  snippet: CodeSnippet,
+  userId: string
+): boolean => {
+  return snippet.shareConfig.some(
+    (share) => share.sourceType === "USER" && share.identifier === userId
+  );
+};
