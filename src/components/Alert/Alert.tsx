@@ -51,7 +51,7 @@ export function Alert({ children, variant, icon }: Props) {
   return (
     <div
       className={classNames(
-        "flex items-center gap-3 rounded-lg p-4",
+        "flex items-center gap-3 rounded-lg border p-4",
         variantProps[variant].className
       )}
       role="alert"
