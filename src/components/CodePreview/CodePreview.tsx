@@ -19,7 +19,7 @@ type Callback = () => void;
 
 type Props = {
   codeSnippet: CodeSnippet;
-  onEdit: Callback;
+  onEdit?: Callback;
   onExecute?: Callback;
   onRemove?: Callback;
   onView?: Callback;
@@ -110,7 +110,9 @@ export function CodePreview({
   }
 
   if (codeSnippet.owner === "USER") {
-    buttons.push(<EditButton key="edit-button" />);
+    if (onEdit) {
+      buttons.push(<EditButton key="edit-button" />);
+    }
 
     if (onRemove) {
       buttons.push(<RemoveButton key="remove-button" />);

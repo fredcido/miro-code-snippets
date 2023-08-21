@@ -38,13 +38,13 @@ export default function CodeEditor() {
   const [filter, setFilter] = useState("");
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  const newSnippet = async (snippet: CodeSnippet) => {
+  const onSnippetCreated = async (snippet: CodeSnippet) => {
     setItems((items) => [snippet, ...items]);
   };
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/require-await
-    const snippetUpdated = async (snippet: CodeSnippet) => {
+    const onSnippetUpdated = async (snippet: CodeSnippet) => {
       setItems((items) => {
         return items.map((item) => {
           if (item.id === snippet.id) {
@@ -56,16 +56,18 @@ export default function CodeEditor() {
       });
     };
 
-    getRegistry().on("snippet:created", newSnippet);
-    getRegistry().on("snippet:updated", snippetUpdated);
+    getRegistry().on("snippet:created", onSnippetCreated);
+    getRegistry().on("snippet:updated", onSnippetUpdated);
 
     return () => {
-      getRegistry().off("snippet:created", newSnippet);
-      getRegistry().off("snippet:updated", snippetUpdated);
+      getRegistry().off("snippet:created", onSnippetCreated);
+      getRegistry().off("snippet:updated", onSnippetUpdated);
     };
   }, []);
 
   useEffect(() => {
+    setMessage(undefined);
+
     const load = () => {
       setState("busy");
 
@@ -151,6 +153,21 @@ export default function CodeEditor() {
       });
   };
 
+  const handleUse = (code: CodeSnippet) => {
+    codeSnippetsService
+      .remove(code)
+      .then(() => {
+        setItems((items) => items.filter((item) => item.id !== code.id));
+      })
+      .catch((error) => {
+        console.error(error);
+        setMessage({
+          content: "Error removing code snippet.",
+          variant: "danger",
+        });
+      });
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const handleFilter = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
@@ -173,6 +190,7 @@ export default function CodeEditor() {
             onEdit={() => handleEdit(item)}
             onRemove={() => handleRemove(item)}
             onExecute={() => void runCode(item)}
+            onUse={() => handleUse(item)}
           />
         ))}
       </>

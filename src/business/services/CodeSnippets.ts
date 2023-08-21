@@ -25,6 +25,10 @@ export class CodeSnippetsService<
     await this.api.delete(`${ENDPOINT}/${snippet.id}`);
   }
 
+  async use(snippet: Entity): Promise<Entity> {
+    return this.api.post(`${ENDPOINT}/uses/${snippet.id}`, snippet);
+  }
+
   async getById(id: string): Promise<Entity> {
     return this.api.get(`${ENDPOINT}/${id}`);
   }
