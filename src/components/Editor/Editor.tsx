@@ -8,19 +8,8 @@ import {
 
 import sdkTypes from "raw-loader!@mirohq/websdk-types/dist/index.d.ts?raw-loader";
 
-type Props = {
-  code?: string;
-  onChange?: OnChange;
-};
-
-export function Editor({ code, onChange }: Props) {
-  const beforeMount: BeforeMount = (monaco: Monaco) => {
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      // noLib: true,
-      allowNonTsExtensions: true,
-    });
-
-    const contextTypes = `
+const getTypes = () => {
+  const contextTypes = `
       type CodeSnippetContext = {
         data: Record<string, unknown>
       }
@@ -30,10 +19,24 @@ export function Editor({ code, onChange }: Props) {
       }
     `;
 
-    const types = `${sdkTypes}${contextTypes}`;
+  const types = `${sdkTypes}${contextTypes}`;
+
+  return types;
+};
+
+type Props = {
+  code?: string;
+  onChange?: OnChange;
+};
+
+export function Editor({ code, onChange }: Props) {
+  const beforeMount: BeforeMount = (monaco: Monaco) => {
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      allowNonTsExtensions: true,
+    });
 
     monaco.languages.typescript.typescriptDefaults.addExtraLib(
-      types,
+      getTypes(),
       "@mirohq/websdk-types"
     );
   };
