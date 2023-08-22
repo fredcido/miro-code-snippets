@@ -25,6 +25,26 @@ describe("Page: <Panel />", () => {
     expect(getAllByRole("status").length).toBeGreaterThan(0);
   });
 
+    it("renders support and send feedback links", async () => {
+      const { queryAllByRole, getByRole } = render(
+        <MiroProvider context={createMiroData()}>
+          <Panel />
+        </MiroProvider>
+      );
+
+      await waitForElementToBeRemoved(queryAllByRole("status"));
+
+      expect(getByRole("link", { name: /learn more/i })).toHaveAttribute(
+        "href",
+        "https://github.com/fredcido/miro-code-snippets/issues"
+      );
+
+      expect(getByRole("link", { name: /send feedback/i })).toHaveAttribute(
+        "href",
+        "https://forms.gle/7vre8fvUKDfc5x3A7"
+      );
+    });
+
   it("renders snippets", async () => {
     const { queryAllByRole, findAllByRole } = render(
       <MiroProvider context={createMiroData()}>

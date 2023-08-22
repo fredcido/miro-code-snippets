@@ -127,8 +127,7 @@ export default function Panel() {
         url: `/code-editor`,
         width: 800,
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
         setMessage({
           content: "Error adding code snippet.",
           variant: "danger",
