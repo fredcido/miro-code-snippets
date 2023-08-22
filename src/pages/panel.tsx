@@ -30,9 +30,11 @@ const tabs: TabType[] = [
   },
 ];
 
-export default function CodeEditor() {
+export default function Panel() {
   const [items, setItems] = useState<CodeSnippet[]>([]);
-  const [state, setState] = useState<"idle" | "busy" | "ready">("idle");
+  const [state, setState] = useState<"idle" | "busy" | "ready" | "error">(
+    "idle"
+  );
   const [tab, setTab] = useState<TabType>(ownedTab);
   const [message, setMessage] = useState<Message | undefined>();
   const [filter, setFilter] = useState("");
@@ -42,20 +44,20 @@ export default function CodeEditor() {
     setItems((items) => [snippet, ...items]);
   };
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    const onSnippetUpdated = async (snippet: CodeSnippet) => {
-      setItems((items) => {
-        return items.map((item) => {
-          if (item.id === snippet.id) {
-            return snippet;
-          }
+  // eslint-disable-next-line @typescript-eslint/require-await
+  const onSnippetUpdated = async (snippet: CodeSnippet) => {
+    setItems((items) => {
+      return items.map((item) => {
+        if (item.id === snippet.id) {
+          return snippet;
+        }
 
-          return item;
-        });
+        return item;
       });
-    };
+    });
+  };
 
+  useEffect(() => {
     getRegistry().on("snippet:created", onSnippetCreated);
     getRegistry().on("snippet:updated", onSnippetUpdated);
 
@@ -87,8 +89,8 @@ export default function CodeEditor() {
         setItems(items);
         setState("ready");
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        setState("error");
         setMessage({
           content: "Error fetching code snippets.",
           variant: "danger",
@@ -214,9 +216,10 @@ export default function CodeEditor() {
 
       <main className="flex flex-grow flex-col gap-4 overflow-auto py-2">
         {message && <Alert variant={message.variant}>{message.content}</Alert>}
-
-        {state === "busy" ? <ListSnippetsSkeleton /> : <ItemsContent />}
+        {state === "ready" && <ItemsContent />}
+        {state === "busy" && <ListSnippetsSkeleton />}
       </main>
+
       <footer className="flex items-center justify-between py-4">
         <a
           href="https://github.com/fredcido/miro-code-snippets/issues"

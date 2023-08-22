@@ -1,27 +1,19 @@
 import userEvent from "@testing-library/user-event";
 import { render, waitFor } from "@testing-library/react";
 import { CodePreview } from "./CodePreview";
-import { type CodeSnippet } from "~/business";
 import { cloneDeep } from "lodash";
-import { MiroProvider, buildMiroData } from "../../../tests/utils";
+import {
+  MiroProvider,
+  createCodeSnippet,
+  createMiroData,
+} from "../../../tests";
 
 describe("<CodePreview />", () => {
-  const codeSnippet: CodeSnippet = {
-    id: "test-code-id",
-    name: "Test code snippet",
-    code: 'console.log("Hey")',
-    owner: "OTHER",
-    status: "PUBLISHED",
-    visibility: "PROTECTED",
-    createdAt: "2023-01-01T10:10",
-    updatedAt: "2023-01-01T14:45",
-    icon: "user",
-    shareConfig: [],
-  };
+  const codeSnippet = createCodeSnippet();
 
   it("renders with no options", async () => {
     const { getByRole, queryByLabelText } = render(
-      <MiroProvider context={buildMiroData()}>
+      <MiroProvider context={createMiroData()}>
         <CodePreview codeSnippet={codeSnippet} />
       </MiroProvider>
     );
@@ -40,7 +32,7 @@ describe("<CodePreview />", () => {
     snippet.status = "DRAFT";
 
     const { getByText } = render(
-      <MiroProvider context={buildMiroData()}>
+      <MiroProvider context={createMiroData()}>
         <CodePreview codeSnippet={snippet} />
       </MiroProvider>
     );
@@ -55,7 +47,7 @@ describe("<CodePreview />", () => {
     };
 
     const { getByText } = render(
-      <MiroProvider context={buildMiroData()}>
+      <MiroProvider context={createMiroData()}>
         <CodePreview codeSnippet={snippet} />
       </MiroProvider>
     );
@@ -70,7 +62,7 @@ describe("<CodePreview />", () => {
 
     const onExecute = jest.fn();
     const { getByLabelText, getByText, getAllByRole } = render(
-      <MiroProvider context={buildMiroData()}>
+      <MiroProvider context={createMiroData()}>
         <CodePreview codeSnippet={snippet} onExecute={onExecute} />
       </MiroProvider>
     );
@@ -92,7 +84,7 @@ describe("<CodePreview />", () => {
 
     const onRemove = jest.fn();
     const { getByLabelText, getByText, getAllByRole } = render(
-      <MiroProvider context={buildMiroData()}>
+      <MiroProvider context={createMiroData()}>
         <CodePreview codeSnippet={snippet} onRemove={onRemove} />
       </MiroProvider>
     );
@@ -114,7 +106,7 @@ describe("<CodePreview />", () => {
 
     const onEdit = jest.fn();
     const { getByLabelText, getByText, getAllByRole } = render(
-      <MiroProvider context={buildMiroData()}>
+      <MiroProvider context={createMiroData()}>
         <CodePreview codeSnippet={snippet} onEdit={onEdit} />
       </MiroProvider>
     );
@@ -138,7 +130,7 @@ describe("<CodePreview />", () => {
 
     const onView = jest.fn();
     const { getByLabelText, getByText, getAllByRole } = render(
-      <MiroProvider context={buildMiroData()}>
+      <MiroProvider context={createMiroData()}>
         <CodePreview codeSnippet={snippet} onView={onView} />
       </MiroProvider>
     );
@@ -154,7 +146,7 @@ describe("<CodePreview />", () => {
   });
 
   it("renders with use action", async () => {
-    const miroData = buildMiroData();
+    const miroData = createMiroData();
     const snippet = cloneDeep(codeSnippet);
 
     // We ensure user is the other to use item

@@ -1,3 +1,5 @@
+import "whatwg-fetch";
+
 export const BASE_API = "/api";
 
 const buildEndpoint = (url: string): string => `${BASE_API}${url}`;

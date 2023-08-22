@@ -43,7 +43,7 @@ export function CodePreview({
   const miroContext = useMiroContext();
 
   if (!miroContext) {
-    return null;
+    throw new Error("Missing Miro Context");
   }
 
   if (codeSnippet.status === "DRAFT") {
