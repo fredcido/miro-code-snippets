@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
-import type { BoardInfo } from "@mirohq/websdk-types";
+import type { BoardInfo, Miro } from "@mirohq/websdk-types";
 import { miroService } from "~/business/services/Miro";
 import type { UserInfo } from "~/business/models";
 import { api } from "~/business";
@@ -15,6 +15,7 @@ type Props = {
 type ContextStatus = "idle" | "loading" | "error" | "done";
 
 export type MiroContextData = {
+  miro: Miro;
   boardInfo: BoardInfo;
   userInfo: UserInfo;
 };
@@ -55,7 +56,7 @@ export function MiroContextWrapper({ children, fallback }: Props) {
   useEffect(() => {
     fetchContext()
       .then((context) => {
-        setContext(context);
+        setContext({ ...context, miro });
 
         api.addHeader("X-BOARD-ID", context.boardInfo.id);
         api.setJWT(context.userInfo.jwt);

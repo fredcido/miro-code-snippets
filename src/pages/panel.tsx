@@ -12,6 +12,7 @@ import { IconButton, IconPlus } from "@mirohq/design-system";
 import { ListSnippetsSkeleton } from "~/components/Skeleton/ListSnippetsSkeleton";
 import { runCode } from "~/business/utils";
 import { type TabType, Tabs } from "~/components/Tabs";
+import { useMiroContext } from "~/components/MiroContext";
 
 const ownedTab = {
   id: "owned",
@@ -31,6 +32,7 @@ const tabs: TabType[] = [
 ];
 
 export default function Panel() {
+  const miroContext = useMiroContext();
   const [items, setItems] = useState<CodeSnippet[]>([]);
   const [state, setState] = useState<"idle" | "busy" | "ready" | "error">(
     "idle"
@@ -105,6 +107,12 @@ export default function Panel() {
       item.name.toLocaleLowerCase().includes(filter)
     );
   }, [filter, items]);
+
+  if (!miroContext) {
+    throw new Error("Missing Miro Context");
+  }
+
+  const { miro } = miroContext;
 
   const handleEdit = (code: CodeSnippet) => {
     miro.board.ui

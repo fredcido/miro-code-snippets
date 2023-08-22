@@ -2,6 +2,7 @@ import { merge } from "lodash";
 import { type MiroContextData } from "~/components/MiroContext";
 
 import { type CodeSnippet } from "~/business";
+import { mockMiro } from "./miro";
 
 export const createMiroData = (
   opts: Partial<MiroContextData> = {}
@@ -18,6 +19,7 @@ export const createMiroData = (
         team: "testTeamId",
         user: "testUserId",
       },
+      miro: mockMiro(),
     },
     opts
   );

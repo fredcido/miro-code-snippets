@@ -2,6 +2,7 @@ import { rest } from "msw";
 import userEvent from "@testing-library/user-event";
 import {
   render,
+  within,
   waitForElementToBeRemoved,
   waitFor,
 } from "@testing-library/react";
@@ -12,9 +13,17 @@ import {
   createMiroData,
   server,
   api,
+  mockMiro,
 } from "../../tests";
 
 describe("Page: <Panel />", () => {
+  let confirmSpy: jest.SpyInstance;
+  beforeAll(() => {
+    confirmSpy = jest.spyOn(window, "confirm");
+    confirmSpy.mockImplementation(jest.fn(() => true));
+  });
+  afterAll(() => confirmSpy.mockRestore());
+
   it("renders skeleton", () => {
     const { getAllByRole } = render(
       <MiroProvider context={createMiroData()}>
@@ -25,25 +34,25 @@ describe("Page: <Panel />", () => {
     expect(getAllByRole("status").length).toBeGreaterThan(0);
   });
 
-    it("renders support and send feedback links", async () => {
-      const { queryAllByRole, getByRole } = render(
-        <MiroProvider context={createMiroData()}>
-          <Panel />
-        </MiroProvider>
-      );
+  it("renders support and send feedback links", async () => {
+    const { queryAllByRole, getByRole } = render(
+      <MiroProvider context={createMiroData()}>
+        <Panel />
+      </MiroProvider>
+    );
 
-      await waitForElementToBeRemoved(queryAllByRole("status"));
+    await waitForElementToBeRemoved(queryAllByRole("status"));
 
-      expect(getByRole("link", { name: /learn more/i })).toHaveAttribute(
-        "href",
-        "https://github.com/fredcido/miro-code-snippets/issues"
-      );
+    expect(getByRole("link", { name: /learn more/i })).toHaveAttribute(
+      "href",
+      "https://github.com/fredcido/miro-code-snippets/issues"
+    );
 
-      expect(getByRole("link", { name: /send feedback/i })).toHaveAttribute(
-        "href",
-        "https://forms.gle/7vre8fvUKDfc5x3A7"
-      );
-    });
+    expect(getByRole("link", { name: /send feedback/i })).toHaveAttribute(
+      "href",
+      "https://forms.gle/7vre8fvUKDfc5x3A7"
+    );
+  });
 
   it("renders snippets", async () => {
     const { queryAllByRole, findAllByRole } = render(
@@ -56,7 +65,7 @@ describe("Page: <Panel />", () => {
 
     expect.assertions(codeSnippets.length);
 
-    const headers = await findAllByRole("heading");
+    const headers = await findAllByRole("heading", { level: 2 });
     headers.forEach((header, idx) => {
       expect(header).toHaveTextContent(codeSnippets.at(idx)!.name);
     });
@@ -124,5 +133,99 @@ describe("Page: <Panel />", () => {
     expect(await findByRole("alert")).toHaveTextContent(
       /error fetching code snippets/i
     );
+  });
+
+  it("adds snippets", async () => {
+    const { miro } = mockMiro();
+
+    const { queryAllByRole, getByRole } = render(
+      <MiroProvider context={createMiroData({ miro })}>
+        <Panel />
+      </MiroProvider>
+    );
+
+    await waitForElementToBeRemoved(queryAllByRole("status"));
+    await userEvent.click(getByRole("button", { name: /add snippet/i }));
+
+    expect(miro.board.ui.openModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: `/code-editor`,
+        width: 800,
+      })
+    );
+  });
+
+  it("handle error when adding snippet", async () => {
+    const { miro } = mockMiro();
+
+    const { queryAllByRole, getByRole, findByRole } = render(
+      <MiroProvider context={createMiroData({ miro })}>
+        <Panel />
+      </MiroProvider>
+    );
+
+    const errorOpen = jest.spyOn(miro.board.ui, "openModal");
+    errorOpen.mockImplementation(() => Promise.reject());
+
+    await waitForElementToBeRemoved(queryAllByRole("status"));
+    await userEvent.click(getByRole("button", { name: /add snippet/i }));
+
+    expect(await findByRole("alert")).toHaveTextContent(
+      /error adding code snippet/i
+    );
+  });
+
+  it("edits snippets", async () => {
+    const { miro } = mockMiro();
+
+    const { queryAllByRole, getByRole } = render(
+      <MiroProvider context={createMiroData({ miro })}>
+        <Panel />
+      </MiroProvider>
+    );
+
+    await waitForElementToBeRemoved(queryAllByRole("status"));
+    await userEvent.click(getByRole("button", { name: /add snippet/i }));
+
+    expect(miro.board.ui.openModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: `/code-editor`,
+        width: 800,
+      })
+    );
+  });
+
+  it("handle error when adding snippet", async () => {
+    const { miro } = mockMiro();
+
+    const { queryAllByRole, findAllByRole, debug, getByRole } = render(
+      <MiroProvider context={createMiroData({ miro })}>
+        <Panel />
+      </MiroProvider>
+    );
+
+    const [, second] = codeSnippets;
+
+    await waitForElementToBeRemoved(queryAllByRole("status"));
+
+    const [, header] = await findAllByRole("heading", {
+      level: 2,
+    });
+    expect(header).toHaveTextContent(second!.name);
+    await userEvent.type(within(header!).getByLabelText("Actions"), "{enter}");
+    const removeButton = getByRole("menuitem", {
+      name: /remove/i,
+    });
+
+    await userEvent.click(removeButton);
+
+    await waitFor(() => {
+      expect(miro.board.ui.openModal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `/code-editor/?id=${second?.id}`,
+          width: 800,
+        })
+      );
+    });
   });
 });
