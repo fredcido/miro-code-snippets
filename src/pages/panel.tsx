@@ -120,8 +120,7 @@ export default function Panel() {
         url: `/code-editor/?id=${code.id}`,
         width: 800,
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
         setMessage({
           content: "Error editing code snippet.",
           variant: "danger",
@@ -153,8 +152,7 @@ export default function Panel() {
       .then(() => {
         setItems((items) => items.filter((item) => item.id !== code.id));
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
         setMessage({
           content: "Error removing code snippet.",
           variant: "danger",

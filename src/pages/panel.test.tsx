@@ -5,16 +5,24 @@ import {
   within,
   waitForElementToBeRemoved,
   waitFor,
+  act,
 } from "@testing-library/react";
 import Panel from "./panel";
 import {
   MiroProvider,
   codeSnippets,
+  createCodeSnippet,
   createMiroData,
   server,
   api,
   mockMiro,
 } from "../../tests";
+import { getRegistry } from "~/business/actions";
+
+// TODO: test tab navigation
+// TODO: test use callback
+// TODO: test execute code callback
+// TODO: message scrolling
 
 describe("Page: <Panel />", () => {
   let confirmSpy: jest.SpyInstance;
@@ -116,7 +124,7 @@ describe("Page: <Panel />", () => {
         return res(
           ctx.status(500),
           ctx.json({
-            messge: "just an error",
+            message: "just an error",
           })
         );
       })
@@ -155,7 +163,7 @@ describe("Page: <Panel />", () => {
     );
   });
 
-  it("handle error when adding snippet", async () => {
+  it("handles error when adding snippet", async () => {
     const { miro } = mockMiro();
 
     const { queryAllByRole, getByRole, findByRole } = render(
@@ -175,7 +183,7 @@ describe("Page: <Panel />", () => {
     );
   });
 
-  it("edits snippets", async () => {
+  it("adds snippets", async () => {
     const { miro } = mockMiro();
 
     const { queryAllByRole, getByRole } = render(
@@ -195,10 +203,10 @@ describe("Page: <Panel />", () => {
     );
   });
 
-  it("handle error when adding snippet", async () => {
+  it("edits snippet", async () => {
     const { miro } = mockMiro();
 
-    const { queryAllByRole, findAllByRole, debug, getByRole } = render(
+    const { queryAllByRole, findAllByRole } = render(
       <MiroProvider context={createMiroData({ miro })}>
         <Panel />
       </MiroProvider>
@@ -212,12 +220,13 @@ describe("Page: <Panel />", () => {
       level: 2,
     });
     expect(header).toHaveTextContent(second!.name);
+
     await userEvent.type(within(header!).getByLabelText("Actions"), "{enter}");
-    const removeButton = getByRole("menuitem", {
-      name: /remove/i,
+    const editButton = within(header!).getByRole("menuitem", {
+      name: /edit/i,
     });
 
-    await userEvent.click(removeButton);
+    await userEvent.click(editButton);
 
     await waitFor(() => {
       expect(miro.board.ui.openModal).toHaveBeenCalledWith(
@@ -226,6 +235,157 @@ describe("Page: <Panel />", () => {
           width: 800,
         })
       );
+    });
+  });
+
+  it("handles error when editing snippet", async () => {
+    const { miro } = mockMiro();
+
+    const { queryAllByRole, findAllByRole, findByRole } = render(
+      <MiroProvider context={createMiroData({ miro })}>
+        <Panel />
+      </MiroProvider>
+    );
+
+    const errorEdit = jest.spyOn(miro.board.ui, "openModal");
+    errorEdit.mockImplementation(() => Promise.reject());
+
+    const [, second] = codeSnippets;
+
+    await waitForElementToBeRemoved(queryAllByRole("status"));
+
+    const [, header] = await findAllByRole("heading", {
+      level: 2,
+    });
+    expect(header).toHaveTextContent(second!.name);
+
+    await userEvent.type(within(header!).getByLabelText("Actions"), "{enter}");
+    const editButton = within(header!).getByRole("menuitem", {
+      name: /edit/i,
+    });
+
+    await userEvent.click(editButton);
+
+    expect(await findByRole("alert")).toHaveTextContent(
+      /error editing code snippet/i
+    );
+  });
+
+  it("removes snippet", async () => {
+    const [, second] = codeSnippets;
+
+    server.use(
+      rest.delete(api("/code-snippets/:id"), (req, res, ctx) => {
+        const { id } = req.params;
+        expect(id).toBe(second?.id);
+
+        return res(ctx.json({}));
+      })
+    );
+
+    const { miro } = mockMiro();
+
+    const { queryAllByRole, findAllByRole } = render(
+      <MiroProvider context={createMiroData({ miro })}>
+        <Panel />
+      </MiroProvider>
+    );
+
+    await waitForElementToBeRemoved(queryAllByRole("status"));
+
+    const [, header] = await findAllByRole("heading", {
+      level: 2,
+    });
+    expect(header).toHaveTextContent(second!.name);
+    await userEvent.type(within(header!).getByLabelText("Actions"), "{enter}");
+    const removeButton = within(header!).getByRole("menuitem", {
+      name: /remove/i,
+    });
+
+    await userEvent.click(removeButton);
+
+    await waitForElementToBeRemoved(
+      queryAllByRole("heading", { level: 2, name: /second script/i })
+    );
+
+    await waitFor(async () => {
+      const headers = await findAllByRole("heading", {
+        level: 2,
+      });
+      expect(headers).toHaveLength(2);
+    });
+  });
+
+  it("handles error when removing snippet", async () => {
+    const [, second] = codeSnippets;
+
+    server.use(
+      rest.delete(api("/code-snippets/:id"), (req, res, ctx) => {
+        const { id } = req.params;
+        expect(id).toBe(second?.id);
+
+        return res(
+          ctx.status(500),
+          ctx.json({
+            message: "just an error",
+          })
+        );
+      })
+    );
+
+    const { miro } = mockMiro();
+
+    const { queryAllByRole, findAllByRole, findByRole } = render(
+      <MiroProvider context={createMiroData({ miro })}>
+        <Panel />
+      </MiroProvider>
+    );
+
+    await waitForElementToBeRemoved(queryAllByRole("status"));
+
+    const [, header] = await findAllByRole("heading", {
+      level: 2,
+    });
+    expect(header).toHaveTextContent(second!.name);
+
+    await userEvent.type(within(header!).getByLabelText("Actions"), "{enter}");
+    const removeButton = within(header!).getByRole("menuitem", {
+      name: /remove/i,
+    });
+
+    await userEvent.click(removeButton);
+
+    expect(await findByRole("alert")).toHaveTextContent(
+      /error removing code snippet/i
+    );
+  });
+
+  it("reacts to snippet creation", async () => {
+    const { miro } = mockMiro();
+
+    const { queryAllByRole, findAllByRole } = render(
+      <MiroProvider context={createMiroData({ miro })}>
+        <Panel />
+      </MiroProvider>
+    );
+
+    await waitForElementToBeRemoved(queryAllByRole("status"));
+
+    const newSnippet = createCodeSnippet({
+      id: "99999",
+      name: "This is a new code snippet",
+    });
+
+    act(() => {
+      getRegistry().dispatch("snippet:created", newSnippet);
+    });
+
+    await waitFor(async () => {
+      const headers = await findAllByRole("heading", {
+        level: 2,
+      });
+      expect(headers).toHaveLength(4);
+      expect(headers.at(0)).toHaveTextContent(newSnippet.name);
     });
   });
 });
