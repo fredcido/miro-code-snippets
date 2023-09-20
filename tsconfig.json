@@ -18,7 +18,8 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
+      "~tests/*": ["tests/*"],
+      "~/*": ["src/*"]
     },
     "typeRoots": ["./node_modules/@types", "./node_modules/@mirohq"]
   },
@@ -28,7 +29,8 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.cjs",
-    "**/*.mjs"
+    "**/*.mjs",
+    "jest.config.ts"
   ],
   "exclude": ["node_modules", "./scripts/*.ts"]
 }

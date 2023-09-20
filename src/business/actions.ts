@@ -1,3 +1,4 @@
+import { BroadcastChannel } from "broadcast-channel";
 import { z } from "zod";
 import { CodeSnippetSchema } from "./models";
 
@@ -17,6 +18,7 @@ const snippetDeleted = z.object({
 });
 
 const ActionsSchema = z.union([snippetCreated, snippetUpdated, snippetDeleted]);
+type ActionTypes = z.infer<typeof ActionsSchema>;
 
 type ActionPayloadMap = {
   "snippet:created": z.infer<typeof snippetCreated>["payload"];
@@ -33,15 +35,15 @@ export type ActionSubscription<Payload = Actions["payload"]> = (
 export type ActionUnsubcriber = () => void;
 
 export class ActionsRegistry {
-  channel: BroadcastChannel;
+  channel: BroadcastChannel<ActionTypes>;
 
   subscriptions = new Map<Actions["type"], ActionSubscription[]>();
 
   constructor(namespace: string) {
-    this.channel = new BroadcastChannel(namespace);
+    this.channel = new BroadcastChannel<ActionTypes>(namespace);
     this.channel.addEventListener("message", (message) => {
       try {
-        const action = ActionsSchema.parse(message.data);
+        const action = ActionsSchema.parse(message);
         console.log("ACTION.INCOMING", { action });
         this.dispatch(action.type, action.payload);
       } catch (error) {
@@ -81,7 +83,7 @@ export class ActionsRegistry {
     action: T,
     payload: ActionPayloadMap[T]
   ): void {
-    const message = {
+    const message: ActionTypes = {
       type: action,
       payload,
     };
@@ -89,7 +91,7 @@ export class ActionsRegistry {
     ActionsSchema.parse(message);
 
     console.log("ACTION.BROADCAST", { message });
-    this.channel.postMessage(message);
+    this.channel.postMessage(message).catch(console.error);
   }
 
   dispatch<T extends Actions["type"]>(

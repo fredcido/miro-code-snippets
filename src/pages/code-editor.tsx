@@ -212,7 +212,7 @@ export default function CodeEditor() {
               autoFocus
             />
           </div>
-          {tags.length > 0 && <Tags tags={tags} />}
+          {tags.length > 0 && <Tags tags={tags} onRemove={console.log} />}
           {message && (
             <Alert variant={message.variant}>
               <div className="font-bold">{message.content}</div>

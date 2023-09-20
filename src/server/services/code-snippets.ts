@@ -36,6 +36,7 @@ export class CodeSnippetService {
     snippet: DataSnippet,
     userInfo: UserInfo
   ): CodeSnippet {
+    console.log({ snippet });
     return {
       id: snippet.id,
       code: snippet.code,
@@ -104,6 +105,7 @@ export class CodeSnippetService {
           ],
         },
       },
+      include: includeSelect,
     });
 
     return this.snippetToCodeSnippet(snippet as SnippetWithRelations, userInfo);

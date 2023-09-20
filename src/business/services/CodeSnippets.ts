@@ -1,52 +1,55 @@
 import { api, type Api } from "../api";
 import type { CodeSnippet, CreateCodeSnippet } from "../models";
 
-const ENDPOINT = "/code-snippets";
-
 export class CodeSnippetsService<
   Entity extends CodeSnippet,
   CreateEntity extends CreateCodeSnippet
 > {
   private api: Api<Entity>;
+  private endpoint = "/code-snippets";
 
   constructor(api: Api<Entity>) {
     this.api = api;
   }
 
   async create(snippet: CreateEntity): Promise<Entity> {
-    return this.api.post<CreateEntity, Entity>(ENDPOINT, snippet);
+    return this.api.post<CreateEntity, Entity>(this.endpoint, snippet);
   }
 
   async update(snippet: Partial<Entity>): Promise<Entity> {
-    return this.api.patch(`${ENDPOINT}/${snippet.id}`, snippet);
+    return this.api.patch(`${this.endpoint}/${snippet.id}`, snippet);
   }
 
   async remove(snippet: Entity): Promise<void> {
-    await this.api.delete(`${ENDPOINT}/${snippet.id}`);
+    await this.api.delete(`${this.endpoint}/${snippet.id}`);
+  }
+
+  async use(snippet: Entity): Promise<Entity> {
+    return this.api.post(`${this.endpoint}/uses/${snippet.id}`, snippet);
   }
 
   async getById(id: string): Promise<Entity> {
-    return this.api.get(`${ENDPOINT}/${id}`);
+    return this.api.get(`${this.endpoint}/${id}`);
   }
 
   async listAll(): Promise<Entity[]> {
-    return this.api.get(ENDPOINT);
+    return this.api.get(this.endpoint);
   }
 
   async listMine(): Promise<Entity[]> {
-    return this.api.get(`${ENDPOINT}/mine`);
+    return this.api.get(`${this.endpoint}/mine`);
   }
 
   async listPublic(): Promise<Entity[]> {
-    return this.api.get(`${ENDPOINT}/public`);
+    return this.api.get(`${this.endpoint}/public`);
   }
 
   async listUsed(): Promise<Entity[]> {
-    return this.api.get(`${ENDPOINT}/user`);
+    return this.api.get(`${this.endpoint}/user`);
   }
 
   async listActions(): Promise<Entity[]> {
-    return this.api.get(`${ENDPOINT}/actions`);
+    return this.api.get(`${this.endpoint}/actions`);
   }
 }
 

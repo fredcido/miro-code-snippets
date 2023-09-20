@@ -13,13 +13,18 @@ import {
 import { type CodeSnippet } from "~/business";
 import { Icon } from "../Icon";
 import { Tags, type TagType } from "../Tags";
-import { hasCustomAction, predicateToTags } from "~/business/utils";
+import {
+  hasCustomAction,
+  predicateToTags,
+  usedByTheUser,
+} from "~/business/utils";
+import { useMiroContext } from "../MiroContext";
 
 type Callback = () => void;
 
 type Props = {
   codeSnippet: CodeSnippet;
-  onEdit: Callback;
+  onEdit?: Callback;
   onExecute?: Callback;
   onRemove?: Callback;
   onView?: Callback;
@@ -35,6 +40,11 @@ export function CodePreview({
   onUse,
 }: Props) {
   const tags: TagType[] = [];
+  const miroContext = useMiroContext();
+
+  if (!miroContext) {
+    throw new Error("Missing Miro Context");
+  }
 
   if (codeSnippet.status === "DRAFT") {
     tags.push({
@@ -110,7 +120,9 @@ export function CodePreview({
   }
 
   if (codeSnippet.owner === "USER") {
-    buttons.push(<EditButton key="edit-button" />);
+    if (onEdit) {
+      buttons.push(<EditButton key="edit-button" />);
+    }
 
     if (onRemove) {
       buttons.push(<RemoveButton key="remove-button" />);
@@ -122,7 +134,7 @@ export function CodePreview({
       buttons.push(<ViewButton key="view-button" />);
     }
 
-    if (onUse) {
+    if (onUse && !usedByTheUser(codeSnippet, miroContext.userInfo.user)) {
       buttons.push(<UseButton key="use-button" />);
     }
   }

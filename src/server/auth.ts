@@ -42,6 +42,7 @@ export const withAuth = async (
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return await next();
   } catch (error) {
+    console.log({ error });
     return res.status(401).json({ error });
   }
 };

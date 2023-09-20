@@ -12,6 +12,7 @@ import { IconButton, IconPlus } from "@mirohq/design-system";
 import { ListSnippetsSkeleton } from "~/components/Skeleton/ListSnippetsSkeleton";
 import { runCode } from "~/business/utils";
 import { type TabType, Tabs } from "~/components/Tabs";
+import { useMiroContext } from "~/components/MiroContext";
 
 const ownedTab = {
   id: "owned",
@@ -30,42 +31,47 @@ const tabs: TabType[] = [
   },
 ];
 
-export default function CodeEditor() {
+export default function Panel() {
+  const miroContext = useMiroContext();
   const [items, setItems] = useState<CodeSnippet[]>([]);
-  const [state, setState] = useState<"idle" | "busy" | "ready">("idle");
+  const [state, setState] = useState<"idle" | "busy" | "ready" | "error">(
+    "idle"
+  );
   const [tab, setTab] = useState<TabType>(ownedTab);
   const [message, setMessage] = useState<Message | undefined>();
   const [filter, setFilter] = useState("");
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  const newSnippet = async (snippet: CodeSnippet) => {
+  const onSnippetCreated = async (snippet: CodeSnippet) => {
     setItems((items) => [snippet, ...items]);
   };
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    const snippetUpdated = async (snippet: CodeSnippet) => {
-      setItems((items) => {
-        return items.map((item) => {
-          if (item.id === snippet.id) {
-            return snippet;
-          }
+  // eslint-disable-next-line @typescript-eslint/require-await
+  const onSnippetUpdated = async (snippet: CodeSnippet) => {
+    setItems((items) => {
+      return items.map((item) => {
+        if (item.id === snippet.id) {
+          return snippet;
+        }
 
-          return item;
-        });
+        return item;
       });
-    };
+    });
+  };
 
-    getRegistry().on("snippet:created", newSnippet);
-    getRegistry().on("snippet:updated", snippetUpdated);
+  useEffect(() => {
+    getRegistry().on("snippet:created", onSnippetCreated);
+    getRegistry().on("snippet:updated", onSnippetUpdated);
 
     return () => {
-      getRegistry().off("snippet:created", newSnippet);
-      getRegistry().off("snippet:updated", snippetUpdated);
+      getRegistry().off("snippet:created", onSnippetCreated);
+      getRegistry().off("snippet:updated", onSnippetUpdated);
     };
   }, []);
 
   useEffect(() => {
+    setMessage(undefined);
+
     const load = () => {
       setState("busy");
 
@@ -85,8 +91,8 @@ export default function CodeEditor() {
         setItems(items);
         setState("ready");
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        setState("error");
         setMessage({
           content: "Error fetching code snippets.",
           variant: "danger",
@@ -102,14 +108,19 @@ export default function CodeEditor() {
     );
   }, [filter, items]);
 
+  if (!miroContext) {
+    throw new Error("Missing Miro Context");
+  }
+
+  const { miro } = miroContext;
+
   const handleEdit = (code: CodeSnippet) => {
     miro.board.ui
       .openModal({
         url: `/code-editor/?id=${code.id}`,
         width: 800,
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
         setMessage({
           content: "Error editing code snippet.",
           variant: "danger",
@@ -123,8 +134,7 @@ export default function CodeEditor() {
         url: `/code-editor`,
         width: 800,
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
         setMessage({
           content: "Error adding code snippet.",
           variant: "danger",
@@ -137,6 +147,20 @@ export default function CodeEditor() {
       return false;
     }
 
+    codeSnippetsService
+      .remove(code)
+      .then(() => {
+        setItems((items) => items.filter((item) => item.id !== code.id));
+      })
+      .catch(() => {
+        setMessage({
+          content: "Error removing code snippet.",
+          variant: "danger",
+        });
+      });
+  };
+
+  const handleUse = (code: CodeSnippet) => {
     codeSnippetsService
       .remove(code)
       .then(() => {
@@ -173,6 +197,7 @@ export default function CodeEditor() {
             onEdit={() => handleEdit(item)}
             onRemove={() => handleRemove(item)}
             onExecute={() => void runCode(item)}
+            onUse={() => handleUse(item)}
           />
         ))}
       </>
@@ -196,9 +221,10 @@ export default function CodeEditor() {
 
       <main className="flex flex-grow flex-col gap-4 overflow-auto py-2">
         {message && <Alert variant={message.variant}>{message.content}</Alert>}
-
-        {state === "busy" ? <ListSnippetsSkeleton /> : <ItemsContent />}
+        {state === "ready" && <ItemsContent />}
+        {state === "busy" && <ListSnippetsSkeleton />}
       </main>
+
       <footer className="flex items-center justify-between py-4">
         <a
           href="https://github.com/fredcido/miro-code-snippets/issues"

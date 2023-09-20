@@ -1,6 +1,6 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { createRouter } from "next-connect";
-import { CodeSnippetSchema } from "~/business";
+import { CodeSnippetSchema } from "~/business/models";
 import { extractUser, withAuth } from "~/server/auth";
 import { onError } from "~/server/middleware";
 import { codeSnippetsService } from "~/server/services/code-snippets";
@@ -21,7 +21,7 @@ router
     const snippet = await codeSnippetsService.update(codeSnippet, userInfo);
     return res.json(snippet);
   })
-  .patch(async (req, res) => {
+  .delete(async (req, res) => {
     const id = req.query.id as string;
     await codeSnippetsService.delete(id);
     return res.json({});
