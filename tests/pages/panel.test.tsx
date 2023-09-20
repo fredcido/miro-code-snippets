@@ -7,7 +7,7 @@ import {
   waitFor,
   act,
 } from "@testing-library/react";
-import Panel from "./panel";
+import Panel from "~/pages/panel";
 import {
   MiroProvider,
   codeSnippets,
@@ -16,7 +16,7 @@ import {
   server,
   api,
   mockMiro,
-} from "../../tests";
+} from "../index";
 import { getRegistry } from "~/business/actions";
 
 // TODO: test tab navigation
@@ -285,7 +285,7 @@ describe("Page: <Panel />", () => {
 
     const { miro } = mockMiro();
 
-    const { queryAllByRole, findAllByRole } = render(
+    const { queryAllByRole, findAllByRole, queryByText } = render(
       <MiroProvider context={createMiroData({ miro })}>
         <Panel />
       </MiroProvider>
@@ -304,15 +304,14 @@ describe("Page: <Panel />", () => {
 
     await userEvent.click(removeButton);
 
-    await waitForElementToBeRemoved(
-      queryAllByRole("heading", { level: 2, name: /second script/i })
-    );
-
     await waitFor(async () => {
       const headers = await findAllByRole("heading", {
         level: 2,
       });
       expect(headers).toHaveLength(2);
+
+      const itemRemoved = queryByText(/second script/i);
+      expect(itemRemoved).not.toBeInTheDocument();
     });
   });
 

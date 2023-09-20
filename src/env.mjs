@@ -8,6 +8,7 @@ export const env = createEnv({
    */
   server: {
     DATABASE_URL: z.string().url(),
+    SERVER_URL: z.string().url().optional(),
     MIRO_CLIENT_SECRET: z.string(),
     MAX_ACTIONS: z.coerce.number(),
     NODE_ENV: z.enum(["development", "test", "production"]),
@@ -28,6 +29,7 @@ export const env = createEnv({
    */
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
+    SERVER_URL: process.env.SERVER_URL,
     NODE_ENV: process.env.NODE_ENV,
     MIRO_CLIENT_SECRET: process.env.MIRO_CLIENT_SECRET,
     NEXT_PUBLIC_MIRO_SDK: process.env.NEXT_PUBLIC_MIRO_SDK,

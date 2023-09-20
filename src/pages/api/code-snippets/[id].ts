@@ -1,6 +1,6 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { createRouter } from "next-connect";
-import { CodeSnippetSchema } from "~/business";
+import { CodeSnippetSchema } from "~/business/models";
 import { extractUser, withAuth } from "~/server/auth";
 import { onError } from "~/server/middleware";
 import { codeSnippetsService } from "~/server/services/code-snippets";

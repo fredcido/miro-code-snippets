@@ -2,11 +2,7 @@ import userEvent from "@testing-library/user-event";
 import { render, waitFor } from "@testing-library/react";
 import { CodePreview } from "./CodePreview";
 import { cloneDeep } from "lodash";
-import {
-  MiroProvider,
-  createCodeSnippet,
-  createMiroData,
-} from "../../../tests";
+import { MiroProvider, createCodeSnippet, createMiroData } from "~tests/index";
 
 describe("<CodePreview />", () => {
   const codeSnippet = createCodeSnippet();

@@ -9,9 +9,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>();
 router.use(withAuth).get(async (req, res) => {
   const boardId = req.headers["x-board-id"] as string;
   const userInfo = await extractUser(req.headers.authorization);
-  console.log({ userInfo });
   const items = await codeSnippetsService.getActions(userInfo, boardId);
-  console.log({ items });
   return res.json(items);
 });
 

@@ -16,6 +16,7 @@ router
   })
   .post(async (req, res) => {
     const boardId = req.headers["x-board-id"] as string;
+    console.log(req.body);
     const newCodeSnippet = CreateCodeSnippetSchema.parse(req.body);
     const userInfo = await extractUser(req.headers.authorization);
 
@@ -25,7 +26,7 @@ router
       boardId
     );
 
-    return res.json(snippet);
+    return res.status(201).json(snippet);
   })
   .patch(async (req, res) => {
     const id = req.query.id as string;
