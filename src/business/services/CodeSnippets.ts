@@ -25,7 +25,7 @@ export class CodeSnippetsService<
   }
 
   async use(snippet: Entity): Promise<Entity> {
-    return this.api.post(`${this.endpoint}/uses/${snippet.id}`, snippet);
+    return this.api.post(`${this.endpoint}/used/${snippet.id}`, snippet);
   }
 
   async getById(id: string): Promise<Entity> {
@@ -45,7 +45,7 @@ export class CodeSnippetsService<
   }
 
   async listUsed(): Promise<Entity[]> {
-    return this.api.get(`${this.endpoint}/user`);
+    return this.api.get(`${this.endpoint}/used`);
   }
 
   async listActions(): Promise<Entity[]> {

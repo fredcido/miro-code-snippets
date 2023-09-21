@@ -11,12 +11,11 @@ router
   .use(withAuth)
   .get(async (req, res) => {
     const userInfo = await extractUser(req.headers.authorization);
-    const items = await codeSnippetsService.getAll(userInfo);
+    const items = await codeSnippetsService.listAll(userInfo);
     return res.json(items);
   })
   .post(async (req, res) => {
     const boardId = req.headers["x-board-id"] as string;
-    console.log(req.body);
     const newCodeSnippet = CreateCodeSnippetSchema.parse(req.body);
     const userInfo = await extractUser(req.headers.authorization);
 

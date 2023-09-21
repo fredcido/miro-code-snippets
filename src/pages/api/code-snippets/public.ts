@@ -9,7 +9,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>();
 router.use(withAuth).get(async (req, res) => {
   const userInfo = await extractUser(req.headers.authorization);
 
-  const items = await codeSnippetsService.getPublic(userInfo);
+  const items = await codeSnippetsService.listPublic(userInfo);
   return res.json(items);
 });
 

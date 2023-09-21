@@ -130,28 +130,20 @@ export class CodeSnippetService {
     return this.snippetToCodeSnippet(snippet, userInfo);
   }
 
-  async getMine(userInfo: UserInfo): Promise<CodeSnippet[]> {
+  async listMine(userInfo: UserInfo): Promise<CodeSnippet[]> {
     const items = await this.prisma.snippet.findMany({
       include: includeSelect,
       where: {
-        OR: [
-          {
-            // User has adopted
-            ShareConfig: {
-              some: {
-                sourceType: "USER",
-                identifier: userInfo.user,
-              },
-            },
-          },
-        ],
+        createdBy: {
+          userId: userInfo.user,
+        },
       },
     });
 
     return items.map((snippet) => this.snippetToCodeSnippet(snippet, userInfo));
   }
 
-  async getPublic(userInfo: UserInfo): Promise<CodeSnippet[]> {
+  async listPublic(userInfo: UserInfo): Promise<CodeSnippet[]> {
     const items = await this.prisma.snippet.findMany({
       include: includeSelect,
       where: {
@@ -163,7 +155,55 @@ export class CodeSnippetService {
     return items.map((snippet) => this.snippetToCodeSnippet(snippet, userInfo));
   }
 
-  async getAll(userInfo: UserInfo): Promise<CodeSnippet[]> {
+  async listUsed(userInfo: UserInfo): Promise<CodeSnippet[]> {
+    const items = await this.prisma.snippet.findMany({
+      include: includeSelect,
+      where: {
+        visibility: "PUBLIC",
+        status: "PUBLISHED",
+        ShareConfig: {
+          some: {
+            sourceType: "USER",
+            identifier: userInfo.user,
+          },
+        },
+      },
+    });
+
+    return items.map((snippet) => this.snippetToCodeSnippet(snippet, userInfo));
+  }
+
+  async use(
+    codeSnippet: CodeSnippet,
+    userInfo: UserInfo,
+    boardId: string
+  ): Promise<void> {
+    const sourceData = {
+      boardId: boardId,
+      userId: userInfo.user,
+      teamId: userInfo.team,
+    };
+
+    await this.prisma.shareConfig.create({
+      data: {
+        identifier: userInfo.user,
+        sourceType: "USER",
+        createdBy: {
+          connectOrCreate: {
+            where: {
+              userId_boardId_teamId: sourceData,
+            },
+            create: sourceData,
+          },
+        },
+        snippet: {
+          connect: { id: codeSnippet.id },
+        },
+      },
+    });
+  }
+
+  async listAll(userInfo: UserInfo): Promise<CodeSnippet[]> {
     const items = await this.prisma.snippet.findMany({
       include: includeSelect,
     });
@@ -171,7 +211,7 @@ export class CodeSnippetService {
     return items.map((snippet) => this.snippetToCodeSnippet(snippet, userInfo));
   }
 
-  async getActions(
+  async listActions(
     userInfo: UserInfo,
     boardId: string
   ): Promise<CodeSnippet[]> {

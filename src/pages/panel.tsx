@@ -22,7 +22,7 @@ const ownedTab = {
 const tabs: TabType[] = [
   ownedTab,
   {
-    id: "user",
+    id: "used",
     name: "Used",
   },
   {
@@ -75,8 +75,8 @@ export default function Panel() {
     const load = () => {
       setState("busy");
 
-      if (tab.id === "user") {
-        return codeSnippetsService.listMine();
+      if (tab.id === "used") {
+        return codeSnippetsService.listUsed();
       }
 
       if (tab.id === "public") {
@@ -162,14 +162,13 @@ export default function Panel() {
 
   const handleUse = (code: CodeSnippet) => {
     codeSnippetsService
-      .remove(code)
+      .use(code)
       .then(() => {
         setItems((items) => items.filter((item) => item.id !== code.id));
       })
       .catch((error) => {
-        console.error(error);
         setMessage({
-          content: "Error removing code snippet.",
+          content: "Error using code snippet.",
           variant: "danger",
         });
       });
