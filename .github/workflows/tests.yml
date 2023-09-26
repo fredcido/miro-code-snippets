@@ -5,6 +5,12 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432
+          SERVER_URL: http://localhost:3000/api 
+          MIRO_CLIENT_SECRET: -)h!$~BeP7rUycba3-Fu%nn"eXL?CZ
+          MAX_ACTIONS: 4
+          NEXT_PUBLIC_MIRO_SDK: https://miro.com/app/static/sdk/v2/miro.js
     steps:
       - uses: actions/checkout@v2
       - name: Test using Node.js
@@ -13,12 +19,6 @@ jobs:
           node-version: '20'
       - run: yarn install
       - run: yarn test:int
-        env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432
-          SERVER_URL: http://localhost:3000/api 
-          MIRO_CLIENT_SECRET: -)h!$~BeP7rUycba3-Fu%nn"eXL?CZ
-          MAX_ACTIONS: 4
-          NEXT_PUBLIC_MIRO_SDK: https://miro.com/app/static/sdk/v2/miro.js
       - run: yarn test:unit
       - name: Tests ✅
         if: ${{ success() }}
