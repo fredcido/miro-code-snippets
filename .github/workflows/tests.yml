@@ -13,6 +13,12 @@ jobs:
           node-version: '20'
       - run: yarn install
       - run: yarn test
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432
+          SERVER_URL: http://localhost:3000/api 
+          MIRO_CLIENT_SECRET: -)h!$~BeP7rUycba3-Fu%nn"eXL?CZ
+          MAX_ACTIONS: 4
+          NEXT_PUBLIC_MIRO_SDK: https://miro.com/app/static/sdk/v2/miro.js
 
       - name: Tests ✅
         if: ${{ success() }}
