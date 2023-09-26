@@ -3,14 +3,14 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 import type { UserInfo } from "~/business/models";
 import { env } from "~/env.mjs";
 import { type NextHandler } from "next-connect/dist/types/types";
+import { logger } from "./logger";
+import { AppError } from "./middleware";
 
-export const extractUser = async (
-  authHeader?: string | null
-): Promise<UserInfo> => {
-  const nope = () => {
-    throw new Error("Invalid JWT provided");
-  };
+const nope = () => {
+  throw new AppError(401, "Invalid JWT provided");
+};
 
+export const extractUser = async (authHeader?: string | null): Promise<UserInfo> => {
   if (!authHeader) {
     return nope();
   }
@@ -40,9 +40,11 @@ export const withAuth = async (
   try {
     await extractUser(req.headers.authorization);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return await next();
+    return next();
   } catch (error) {
-    console.log({ error });
-    return res.status(401).json({ error });
+    logger.error(error);
+    // @ts-expect-error error is unknown
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    return res.status(401).json({ error: error.message });
   }
 };

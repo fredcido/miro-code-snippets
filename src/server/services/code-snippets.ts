@@ -36,13 +36,12 @@ export class CodeSnippetService {
     snippet: DataSnippet,
     userInfo: UserInfo
   ): CodeSnippet {
-    console.log({ snippet });
     return {
       id: snippet.id,
       code: snippet.code,
       name: snippet.name,
-      createdAt: snippet.createdAt.toDateString(),
-      updatedAt: snippet.updatedAt.toDateString(),
+      createdAt: snippet.createdAt.toISOString(),
+      updatedAt: snippet.updatedAt.toISOString(),
       status: snippet.status,
       visibility: snippet.visibility,
       icon: snippet.icon,

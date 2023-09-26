@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { createMock } from "@golevelup/ts-jest";
+import { merge } from "lodash";
 import type {
   Miro,
   BoardViewport,
@@ -8,6 +9,7 @@ import type {
   BoardUI,
   Notifications,
 } from "@mirohq/websdk-types";
+import { type MiroContextData } from "~/components/MiroContext";
 
 export function mockMiro() {
   const mockViewport = createMock<BoardViewport>();
@@ -35,3 +37,23 @@ export function mockMiro() {
 
   return { miro, mockViewport, mockUI, mockNotifications, mockBoard };
 }
+
+export const createMiroData = (
+  opts: Partial<MiroContextData> = {}
+): MiroContextData =>
+  merge(
+    {
+      boardInfo: {
+        id: "testBoardInfo",
+        createdAt: "2023-01-01T10:10",
+        updatedAt: "2023-01-01T14:45",
+      },
+      userInfo: {
+        jwt: "testJWT",
+        team: "testTeamId",
+        user: "testUserId",
+      },
+      miro: mockMiro(),
+    },
+    opts
+  );
